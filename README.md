@@ -10,6 +10,12 @@ Mission-readiness console for a Mars transit crew. Gather sleep and fatigue chec
 
 Try: **Review check-in → Confirm stand-down → Confirm plan**.
 
+Also available:
+
+- **Qualifications** — edit crew skills and cooling-loop requirements
+- **Medical flags** — injury / EVA limit / contagion holds that block assignment
+- **Operator role** — Medical officer opens on Crew health; Commander opens on Mission plan
+
 ## Data
 
 - Sleep totals come from the open [PhysioNet BIDSleep dataset](https://physionet.org/content/bidsleep-dataset/1.0.1/) (expert-reviewed overnight stage labels → total sleep time).

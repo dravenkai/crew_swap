@@ -1,11 +1,46 @@
-const templateCrew = [
-  {id:'ibarra',name:'S. Ibarra',fullName:'Sofia Ibarra',role:'Commander',initials:'SI',sleep:7.6,fatigue:2,baseline:7.7,history:[7.8,7.5,7.9,7.4,7.8,7.6,7.6],state:'available',skills:['EVA command'],note:'Feeling rested. Ready for the inspection.',time:'08:15'},
-  {id:'chen',name:'L. Chen',fullName:'Lin Chen',role:'Systems specialist',initials:'LC',sleep:4.8,fatigue:7,baseline:7.4,history:[7.5,7.2,6.8,6.5,5.9,5.3,4.8],state:'review',skills:['Cooling systems','EVA systems'],note:'Woke up several times. Having trouble concentrating this morning.',time:'08:32'},
-  {id:'alvarez',name:'R. Alvarez',fullName:'Rafael Alvarez',role:'Flight engineer',initials:'RA',sleep:7.2,fatigue:3,baseline:7.3,history:[7.1,7.6,7.3,7.5,7.0,7.4,7.2],state:'available',skills:['Cooling systems','EVA systems'],note:'Slept well. Available for systems work if needed.',time:'08:20'},
-  {id:'okonkwo',name:'A. Okonkwo',fullName:'Amara Okonkwo',role:'Crew medical officer',initials:'AO',sleep:7.8,fatigue:2,baseline:7.6,history:[7.5,7.7,7.3,7.8,7.6,7.9,7.8],state:'available',skills:['Medical operations'],note:'No concerns at this morning’s check-in.',time:'08:10'}
+const ALL_SKILLS = [
+  'EVA command',
+  'Cooling systems',
+  'EVA systems',
+  'Medical operations',
+  'Plant biology',
+  'Power systems'
 ];
 
-const storageKey = 'crew-swap-data-v2';
+const FLAG_OPTIONS = [
+  {id: 'injury', label: 'Injury / limited mobility', blocks: ['assignment']},
+  {id: 'eva-limit', label: 'EVA limit', blocks: ['eva']},
+  {id: 'contagion', label: 'Contagion watch', blocks: ['assignment']},
+  {id: 'med-hold', label: 'Medication hold', blocks: ['eva', 'assignment']}
+];
+
+const templateCrew = [
+  {id:'ibarra',name:'S. Ibarra',fullName:'Sofia Ibarra',role:'Commander',initials:'SI',sleep:7.6,fatigue:2,baseline:7.7,history:[7.8,7.5,7.9,7.4,7.8,7.6,7.6],state:'available',skills:['EVA command'],flags:[],note:'Feeling rested. Ready for the inspection.',time:'08:15'},
+  {id:'chen',name:'L. Chen',fullName:'Lin Chen',role:'Systems specialist',initials:'LC',sleep:4.8,fatigue:7,baseline:7.4,history:[7.5,7.2,6.8,6.5,5.9,5.3,4.8],state:'review',skills:['Cooling systems','EVA systems'],flags:[],note:'Woke up several times. Having trouble concentrating this morning.',time:'08:32'},
+  {id:'alvarez',name:'R. Alvarez',fullName:'Rafael Alvarez',role:'Flight engineer',initials:'RA',sleep:7.2,fatigue:3,baseline:7.3,history:[7.1,7.6,7.3,7.5,7.0,7.4,7.2],state:'available',skills:['Cooling systems','EVA systems'],flags:[],note:'Slept well. Available for systems work if needed.',time:'08:20'},
+  {id:'okonkwo',name:'A. Okonkwo',fullName:'Amara Okonkwo',role:'Crew medical officer',initials:'AO',sleep:7.8,fatigue:2,baseline:7.6,history:[7.5,7.7,7.3,7.8,7.6,7.9,7.8],state:'available',skills:['Medical operations'],flags:[],note:'No concerns at this morning’s check-in.',time:'08:10'}
+];
+
+const ROLES = {
+  medical: {
+    id: 'medical',
+    label: 'Crew medical officer',
+    short: 'A. Okonkwo',
+    initials: 'AO',
+    defaultView: 'health',
+    heading: 'Start with crew health.'
+  },
+  commander: {
+    id: 'commander',
+    label: 'Commander',
+    short: 'S. Ibarra',
+    initials: 'SI',
+    defaultView: 'plan',
+    heading: 'Start with the mission plan.'
+  }
+};
+
+const storageKey = 'crew-swap-data-v3';
 let sleepCatalog = null;
 let state;
 let currentView = 'overview';
@@ -15,6 +50,8 @@ const byId = id => state.crew.find(c => c.id === id);
 const escapeText = value => String(value).replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 const clock = () => new Date().toISOString().slice(11, 16);
 const statusLabel = c => c.state === 'down' ? 'Stand-down confirmed' : c.state === 'review' ? 'Check-in needs review' : 'Available';
+const flagMeta = id => FLAG_OPTIONS.find(f => f.id === id);
+const crewFlags = c => (c.flags || []).map(flagMeta).filter(Boolean);
 
 function fatigueFromDeficit(deficit) {
   return Math.max(1, Math.min(10, Math.round(2 + deficit * 2.2)));
@@ -38,13 +75,65 @@ function applySleepData(crewList, catalog) {
     if (person.id === 'chen' && next.state === 'review') {
       next.note = `Measured sleep fell to ${next.sleep.toFixed(2)} h last night against a ${next.baseline.toFixed(2)} h usual average. Concentration feels off this morning.`;
     }
+    next.skills = Array.isArray(person.skills) ? [...person.skills] : [];
+    next.flags = Array.isArray(person.flags) ? [...person.flags] : [];
     return next;
   });
 }
 
+function defaultRequirements() {
+  return {
+    coolingLoop: {
+      title: 'Cooling loop inspection',
+      specialistSkills: ['Cooling systems'],
+      commanderSkill: 'EVA command'
+    }
+  };
+}
+
 function freshState(catalog) {
   const crew = catalog ? applySleepData(templateCrew, catalog) : structuredClone(templateCrew);
-  return {crew, assigned:'chen', inspectionDeferred:false, version:1, log:[], selected:'chen', dataVersion: catalog?.dataset?.version || 'sample'};
+  return {
+    crew,
+    assigned: 'chen',
+    inspectionDeferred: false,
+    version: 1,
+    log: [],
+    selected: 'chen',
+    dataVersion: catalog?.dataset?.version || 'sample',
+    operatorRole: 'medical',
+    requirements: defaultRequirements()
+  };
+}
+
+function normalizeState(saved, catalog) {
+  const base = freshState(catalog);
+  if (!saved?.crew?.length) return base;
+  const crew = base.crew.map(person => {
+    const prior = saved.crew.find(c => c.id === person.id);
+    if (!prior) return person;
+    return {
+      ...person,
+      ...prior,
+      history: Array.isArray(prior.history) ? prior.history : person.history,
+      skills: Array.isArray(prior.skills) ? prior.skills.filter(s => ALL_SKILLS.includes(s)) : person.skills,
+      flags: Array.isArray(prior.flags) ? prior.flags.filter(id => FLAG_OPTIONS.some(f => f.id === id)) : []
+    };
+  });
+  return {
+    ...base,
+    ...saved,
+    crew,
+    requirements: {
+      coolingLoop: {
+        ...base.requirements.coolingLoop,
+        ...(saved.requirements?.coolingLoop || {}),
+        specialistSkills: (saved.requirements?.coolingLoop?.specialistSkills || base.requirements.coolingLoop.specialistSkills)
+          .filter(s => ALL_SKILLS.includes(s))
+      }
+    },
+    operatorRole: ROLES[saved.operatorRole] ? saved.operatorRole : 'medical'
+  };
 }
 
 function readState(catalog) {
@@ -56,7 +145,7 @@ function readState(catalog) {
       Array.isArray(saved.log) &&
       saved.dataVersion === (catalog?.dataset?.version || 'sample')
     ) {
-      return saved;
+      return normalizeState(saved, catalog);
     }
   } catch {}
   return freshState(catalog);
@@ -87,18 +176,34 @@ function dataBadge() {
   return 'MEASURED SLEEP · PHYSIONET BIDSLEEP';
 }
 
+function flagBlocks(c, kind) {
+  return crewFlags(c).find(f => f.blocks.includes(kind));
+}
+
+function renderOperator() {
+  const role = ROLES[state.operatorRole];
+  document.getElementById('operator-avatar').textContent = role.initials;
+  document.getElementById('operator-name').textContent = role.short;
+  document.getElementById('operator-role').textContent = role.label;
+  document.getElementById('role-select').value = state.operatorRole;
+}
+
 function renderCrew() {
-  document.getElementById('crew-grid').innerHTML = state.crew.map(c => `
+  document.getElementById('crew-grid').innerHTML = state.crew.map(c => {
+    const flags = crewFlags(c);
+    return `
     <button class="crew-card card ${state.selected === c.id ? 'selected' : ''}" data-crew="${c.id}" aria-pressed="${state.selected === c.id}" aria-label="Review ${escapeText(c.fullName)}, ${statusLabel(c)}">
       <div class="crew-card-top"><span class="avatar">${c.initials}</span><div><h3>${c.name}</h3><div class="crew-role">${c.role}</div></div></div>
       <div class="crew-status ${c.state}"><i class="dot ${c.state === 'review' ? 'amber' : c.state === 'down' ? 'gray' : 'green'}"></i>${statusLabel(c)}</div>
+      ${flags.length ? `<div class="flag-row">${flags.map(f => `<span class="flag-chip">${escapeText(f.label)}</span>`).join('')}</div>` : ''}
       <div class="crew-metrics">
         <div><span class="metric-label">Last night’s sleep</span><span class="metric-value ${c.sleep < c.baseline - 1 ? 'warning' : ''}">${c.sleep.toFixed(2)}<small>h</small></span></div>
         <div><span class="metric-label">Reported fatigue</span><span class="metric-value ${c.fatigue >= 6 ? 'warning' : ''}">${c.fatigue}<small>/ 10</small></span></div>
       </div>
       <div class="mini-trend" aria-hidden="true">${c.history.map(v => `<span style="--bar:${Math.max(10, v / 9 * 100)}%"></span>`).join('')}</div>
       <div class="crew-foot"><span>7-NIGHT SLEEP TREND</span><span>CHECK-IN ${escapeText(c.time)}</span></div>
-    </button>`).join('');
+    </button>`;
+  }).join('');
 }
 
 function renderHealth() {
@@ -107,6 +212,7 @@ function renderHealth() {
   const sourceLine = c.subject
     ? `Measured total sleep from PhysioNet BIDSleep subject ${escapeText(c.subject)}. Crew identity and mission duties remain simulated.`
     : 'Sample sleep history for interface review.';
+  const flags = crewFlags(c);
   document.getElementById('health-panel').innerHTML = `
     <div class="panel-header"><div><span class="eyebrow">CREW HEALTH / ${c.initials}</span><h2>${c.name}’s check-in</h2></div><span class="focus-tag">${c.state === 'review' ? 'NEEDS REVIEW' : c.state === 'down' ? 'STAND-DOWN' : 'AVAILABLE'}</span></div>
     <div class="detail-main">
@@ -117,6 +223,12 @@ function renderHealth() {
         <div class="chart-days">${[181,182,183,184,185,186,187].map(d => `<span>${d}</span>`).join('')}</div>
       </figure>
       <blockquote class="quote">“${escapeText(c.note)}”<small>${c.name.toUpperCase()} · SELF-REPORTED</small></blockquote>
+      <div class="flag-block">
+        <div class="flag-block-head"><span class="metric-label">Medical flags</span><button type="button" class="text-link" data-action="flags">Edit flags →</button></div>
+        ${flags.length
+          ? `<ul class="flag-list">${flags.map(f => `<li><strong>${escapeText(f.label)}</strong><span>Blocks ${f.blocks.join(' · ')}</span></li>`).join('')}</ul>`
+          : '<p class="health-footnote">No medical flags on record.</p>'}
+      </div>
       <p class="health-footnote">${sourceLine}</p>
       <div class="health-actions">
         <button class="button btn btn--secondary secondary" data-action="checkin">Update check-in</button>
@@ -126,20 +238,101 @@ function renderHealth() {
     </div>`;
 }
 
+function renderQualifications() {
+  const req = state.requirements.coolingLoop;
+  const panel = document.getElementById('qualifications-panel');
+  panel.innerHTML = `
+    <div class="panel-header">
+      <div><span class="eyebrow">MISSION INPUTS</span><h2>Qualification matrix</h2></div>
+      <button class="button btn btn--secondary secondary" id="save-quals-hint" type="button" disabled>Edits save as you go</button>
+    </div>
+    <div class="quals-body">
+      <section class="quals-block">
+        <h3>Cooling loop requirements</h3>
+        <p class="health-footnote">Who can cover the 09:30 inspection. Specialist skills and the commander skill are editable.</p>
+        <div class="skill-chips" id="req-specialist">
+          ${ALL_SKILLS.map(skill => `
+            <label class="skill-chip"><input type="checkbox" data-req="specialist" value="${escapeText(skill)}" ${req.specialistSkills.includes(skill) ? 'checked' : ''}> ${escapeText(skill)}</label>
+          `).join('')}
+        </div>
+        <label class="field"><span>Commander skill</span>
+          <select id="req-commander">${ALL_SKILLS.map(skill => `<option value="${escapeText(skill)}" ${req.commanderSkill === skill ? 'selected' : ''}>${escapeText(skill)}</option>`).join('')}</select>
+        </label>
+      </section>
+      <section class="quals-block">
+        <h3>Crew skills</h3>
+        <div class="quals-table-wrap">
+          <table class="quals-table">
+            <thead><tr><th>Crew</th>${ALL_SKILLS.map(s => `<th>${escapeText(s)}</th>`).join('')}</tr></thead>
+            <tbody>
+              ${state.crew.map(c => `
+                <tr>
+                  <th scope="row">${escapeText(c.name)}<small>${escapeText(c.role)}</small></th>
+                  ${ALL_SKILLS.map(skill => `
+                    <td><input type="checkbox" data-crew-skill="${c.id}" value="${escapeText(skill)}" ${c.skills.includes(skill) ? 'checked' : ''} aria-label="${escapeText(c.name)} ${escapeText(skill)}"></td>
+                  `).join('')}
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>`;
+
+  panel.querySelectorAll('[data-req="specialist"]').forEach(input => {
+    input.onchange = () => {
+      state.requirements.coolingLoop.specialistSkills = [...panel.querySelectorAll('[data-req="specialist"]:checked')].map(el => el.value);
+      if (!state.requirements.coolingLoop.specialistSkills.length) {
+        state.requirements.coolingLoop.specialistSkills = ['Cooling systems'];
+        input.checked = input.value === 'Cooling systems';
+      }
+      addLog('Qualification matrix updated', `Cooling loop specialist skills: ${state.requirements.coolingLoop.specialistSkills.join(', ')}.`);
+      render();
+      toast('Task requirements updated.');
+    };
+  });
+  document.getElementById('req-commander').onchange = event => {
+    state.requirements.coolingLoop.commanderSkill = event.target.value;
+    addLog('Qualification matrix updated', `Commander skill set to ${event.target.value}.`);
+    render();
+    toast('Commander skill updated.');
+  };
+  panel.querySelectorAll('[data-crew-skill]').forEach(input => {
+    input.onchange = () => {
+      const person = byId(input.dataset.crewSkill);
+      const skill = input.value;
+      if (input.checked && !person.skills.includes(skill)) person.skills.push(skill);
+      if (!input.checked) person.skills = person.skills.filter(s => s !== skill);
+      addLog(`${person.name} qualifications updated`, person.skills.length ? person.skills.join(', ') : 'No skills listed.');
+      render();
+      toast(`${person.name} skills saved.`);
+    };
+  });
+}
+
 function inspectionStatus() {
   if (state.inspectionDeferred) return 'Deferred';
-  if (byId('ibarra').state === 'down' || byId(state.assigned).state === 'down') return 'Coverage gap';
-  if (byId(state.assigned).state === 'review' || byId('ibarra').state === 'review') return 'Health review';
+  const specialist = byId(state.assigned);
+  const commander = byId('ibarra');
+  if (commander.state === 'down' || specialist.state === 'down') return 'Coverage gap';
+  if (flagBlocks(commander, 'assignment') || flagBlocks(commander, 'eva') || flagBlocks(specialist, 'assignment') || flagBlocks(specialist, 'eva')) return 'Coverage gap';
+  if (!meetsSpecialist(specialist) || !commander.skills.includes(state.requirements.coolingLoop.commanderSkill)) return 'Coverage gap';
+  if (specialist.state === 'review' || commander.state === 'review') return 'Health review';
   return 'Scheduled';
+}
+
+function meetsSpecialist(c) {
+  const needed = state.requirements.coolingLoop.specialistSkills;
+  return needed.every(skill => c.skills.includes(skill));
 }
 
 function tasks() {
   const swap = state.assigned === 'alvarez' && !state.inspectionDeferred;
   return [
-    {time:'09:30', title:'Cooling loop inspection', duration:'90 min', crew:[state.assigned,'ibarra'], status:inspectionStatus()},
-    {time:'09:30', title:'Medical console coverage', duration:'45 min', crew:['okonkwo'], status:byId('okonkwo').state === 'down' ? 'Coverage gap' : 'Scheduled'},
-    {time:swap ? '13:00' : '10:00', title:'Plant growth experiment', duration:'60 min', crew:['alvarez'], status:byId('alvarez').state === 'down' ? 'Deferred' : swap ? 'Rescheduled' : 'Scheduled'},
-    {time:'11:15', title:'Resistive exercise', duration:'45 min', crew:state.crew.filter(c => c.state !== 'down').map(c => c.id), status:'Scheduled'}
+    {time:'09:30', title: state.requirements.coolingLoop.title, duration:'90 min', crew:[state.assigned,'ibarra'], status:inspectionStatus()},
+    {time:'09:30', title:'Medical console coverage', duration:'45 min', crew:['okonkwo'], status:byId('okonkwo').state === 'down' || flagBlocks(byId('okonkwo'), 'assignment') ? 'Coverage gap' : 'Scheduled'},
+    {time:swap ? '13:00' : '10:00', title:'Plant growth experiment', duration:'60 min', crew:['alvarez'], status:byId('alvarez').state === 'down' || flagBlocks(byId('alvarez'), 'assignment') ? 'Deferred' : swap ? 'Rescheduled' : 'Scheduled'},
+    {time:'11:15', title:'Resistive exercise', duration:'45 min', crew:state.crew.filter(c => c.state !== 'down' && !flagBlocks(c, 'assignment')).map(c => c.id), status:'Scheduled'}
   ].sort((a, b) => a.time.localeCompare(b.time));
 }
 
@@ -165,6 +358,7 @@ function renderSchedule() {
 
 function renderAlert() {
   const needs = state.crew.filter(c => c.state === 'review');
+  const flagged = state.crew.filter(c => crewFlags(c).length);
   const gaps = tasks().filter(t => t.status === 'Coverage gap');
   const box = document.getElementById('alert-banner');
   box.classList.toggle('resolved', !needs.length && !gaps.length);
@@ -174,16 +368,18 @@ function renderAlert() {
       ? `${needs.length === 1 ? 'One crew member needs' : needs.length + ' crew members need'} a closer look.`
       : 'Crew changes are accounted for.';
   document.getElementById('alert-description').textContent = gaps.length
-    ? 'A confirmed stand-down affects an assigned task. Review available coverage.'
+    ? 'A stand-down, medical flag, or missing qualification affects an assigned task.'
     : needs.length
       ? `${needs.map(c => c.name).join(', ')} ${needs.length === 1 ? 'has' : 'have'} a check-in awaiting review before the next operation.`
-      : 'Review the current plan and share the onboard decision with Earth.';
+      : flagged.length
+        ? `${flagged.map(c => c.name).join(', ')} ${flagged.length === 1 ? 'carries' : 'carry'} medical flags that can block assignment.`
+        : 'Review the current plan and share the onboard decision with Earth.';
   document.getElementById('review-checkin').innerHTML = gaps.length
     ? 'Review coverage ↗'
     : needs.length
       ? 'Review check-in ↗'
       : 'View Earth packet ↗';
-  document.getElementById('attention-count').textContent = needs.length;
+  document.getElementById('attention-count').textContent = needs.length + flagged.filter(c => c.state !== 'review').length;
   document.getElementById('log-count').textContent = state.log.length;
 }
 
@@ -196,6 +392,7 @@ function renderLog() {
 function renderChrome() {
   const tag = document.querySelector('.preview-tag');
   if (tag) tag.textContent = dataBadge();
+  renderOperator();
 }
 
 function render() {
@@ -205,6 +402,7 @@ function render() {
   renderSchedule();
   renderAlert();
   renderLog();
+  if (currentView === 'quals') renderQualifications();
   const next = tasks().find(t => t.status !== 'Deferred');
   document.getElementById('next-operation').textContent = next ? `${next.time} · ${next.title}` : 'Review deferred operations';
   persist();
@@ -215,8 +413,9 @@ function setView(view) {
   document.querySelectorAll('.nav-item').forEach(b => b.classList.toggle('active', b.dataset.view === view));
   const labels = {
     overview: ['Overview', 'Ready for what’s next.', 'A clear view of your crew. A plan that adapts with them.'],
-    health: ['Crew health', 'Every crew member matters.', 'Review personal trends and the latest check-ins.'],
+    health: ['Crew health', 'Every crew member matters.', 'Review personal trends, medical flags, and the latest check-ins.'],
     plan: ['Mission plan', 'Keep the mission moving.', 'See who is assigned, what has changed, and where coverage is needed.'],
+    quals: ['Qualifications', 'Who is cleared for which job.', 'Edit crew skills and the cooling-loop requirements used for coverage.'],
     log: ['Decision log', 'A record of every decision.', 'Health reviews, duty changes, and the reasoning behind the plan.']
   };
   document.getElementById('breadcrumb-current').textContent = labels[view][0];
@@ -225,12 +424,14 @@ function setView(view) {
   document.body.classList.toggle('plan-view', view === 'plan');
   document.body.classList.toggle('health-view', view === 'health');
   document.body.classList.toggle('overview-view', view === 'overview');
-  // Overview = crew + schedule + health. Health = crew + health only. Plan = schedule only. Log = decision log only.
-  document.getElementById('crew-section').classList.toggle('hidden', view === 'log' || view === 'plan');
-  document.getElementById('workspace').classList.toggle('hidden', view === 'log');
+  document.body.classList.toggle('quals-view', view === 'quals');
+  document.getElementById('crew-section').classList.toggle('hidden', view === 'log' || view === 'plan' || view === 'quals');
+  document.getElementById('workspace').classList.toggle('hidden', view === 'log' || view === 'quals');
   document.getElementById('log-panel').classList.toggle('hidden', view !== 'log');
-  document.getElementById('alert-banner').classList.toggle('hidden', view === 'log');
-  document.getElementById('new-checkin').classList.toggle('hidden', view === 'plan' || view === 'log');
+  document.getElementById('qualifications-panel').classList.toggle('hidden', view !== 'quals');
+  document.getElementById('alert-banner').classList.toggle('hidden', view === 'log' || view === 'quals');
+  document.getElementById('new-checkin').classList.toggle('hidden', view === 'plan' || view === 'log' || view === 'quals');
+  if (view === 'quals') renderQualifications();
 }
 
 const dialog = document.getElementById('dialog');
@@ -285,9 +486,35 @@ function openCheckin() {
   });
 }
 
+function openFlags() {
+  const c = byId(state.selected);
+  showDialog('Medical flags', 'CREW MEDICAL OFFICER / ' + c.initials, `
+    <p>Non-sleep constraints that can block assignment or EVA work for ${escapeText(c.name)}.</p>
+    <form id="flags-form">
+      ${FLAG_OPTIONS.map(flag => `
+        <label class="choice">
+          <input type="checkbox" name="flag" value="${flag.id}" ${(c.flags || []).includes(flag.id) ? 'checked' : ''}>
+          <strong>${escapeText(flag.label)}</strong>
+          <p>Blocks: ${flag.blocks.join(' · ')}</p>
+        </label>
+      `).join('')}
+      <div class="dialog-actions"><button type="button" class="button btn btn--secondary secondary" data-close>Cancel</button><button class="button btn btn--primary primary" type="submit">Save flags →</button></div>
+    </form>`);
+  document.getElementById('flags-form').onsubmit = event => {
+    event.preventDefault();
+    const selected = [...event.target.querySelectorAll('input[name="flag"]:checked')].map(el => el.value);
+    c.flags = selected;
+    addLog(`${c.name} medical flags updated`, selected.length ? selected.map(id => flagMeta(id).label).join('; ') : 'All medical flags cleared.');
+    closeDialog();
+    render();
+    toast('Medical flags saved.');
+  };
+}
+
 function openDuty() {
   const c = byId(state.selected);
   const measured = c.subject ? `<p class="health-footnote">Sleep chart uses measured BIDSleep subject ${escapeText(c.subject)}. The stand-down decision stays with the medical officer.</p>` : '';
+  const flags = crewFlags(c);
   showDialog('Review duty status', 'CREW MEDICAL OFFICER / ' + c.initials, `
     <p>Review ${c.name}’s report and confirm the appropriate duty status.</p>
     <div class="review-summary">
@@ -296,6 +523,7 @@ function openDuty() {
       <div><span>Fatigue</span><b>${c.fatigue}/10</b></div>
     </div>
     <blockquote class="quote">“${escapeText(c.note)}”</blockquote>
+    ${flags.length ? `<p class="health-footnote">Active flags: ${flags.map(f => f.label).join('; ')}.</p>` : ''}
     ${measured}
     <p>Standing down removes ${c.name} from available coverage. Existing assignments will be flagged for replanning.</p>
     <div class="dialog-actions">
@@ -320,22 +548,29 @@ function openDuty() {
 function candidateReason(c) {
   if (c.state === 'down') return 'Confirmed stand-down';
   if (c.state === 'review') return 'Health review pending';
-  if (!c.skills.includes('Cooling systems')) return 'Cooling systems qualification required';
+  const blocked = flagBlocks(c, 'assignment') || flagBlocks(c, 'eva');
+  if (blocked) return blocked.label;
+  if (!meetsSpecialist(c)) {
+    const missing = state.requirements.coolingLoop.specialistSkills.filter(s => !c.skills.includes(s));
+    return missing.length ? `Missing: ${missing.join(', ')}` : 'Specialist qualification required';
+  }
   return '';
 }
 
 function openCoverage() {
-  const commanderDown = byId('ibarra').state === 'down';
+  const commander = byId('ibarra');
+  const commanderSkill = state.requirements.coolingLoop.commanderSkill;
+  const commanderDown = commander.state === 'down' || !!flagBlocks(commander, 'assignment') || !!flagBlocks(commander, 'eva') || !commander.skills.includes(commanderSkill);
   const eligible = state.crew.filter(c => !candidateReason(c));
   const options = state.crew.filter(c => c.id !== 'ibarra');
   const selected = eligible.find(c => c.id === state.assigned) || eligible[0];
   showDialog('Find the next workable plan.', 'MISSION PLAN / COOLING LOOP INSPECTION', `
-    <p>09:30–11:00 UTC · Requires a cooling systems specialist and an EVA commander. Qualifications and assignments are sample mission inputs.</p>
-    ${commanderDown ? '<div class="plan-notice">The only EVA commander is stood down. The inspection must be deferred until qualified coverage is available.</div>' : ''}
+    <p>09:30–11:00 UTC · Requires ${state.requirements.coolingLoop.specialistSkills.join(' + ')} and ${commanderSkill}. Edit these under Qualifications.</p>
+    ${commanderDown ? `<div class="plan-notice">Commander coverage is blocked (${commander.state === 'down' ? 'stand-down' : flagBlocks(commander, 'assignment')?.label || flagBlocks(commander, 'eva')?.label || `missing ${commanderSkill}`}). The inspection must be deferred until qualified coverage is available.</div>` : ''}
     <form id="coverage-form">
       ${options.map(c => {
         const reason = commanderDown ? 'EVA commander unavailable' : candidateReason(c);
-        return `<label class="choice"><input type="radio" name="replacement" value="${c.id}" ${reason ? 'disabled' : c.id === selected?.id ? 'checked' : ''}><strong>${c.name} · ${c.role}</strong><p>${c.skills.join(' · ')}</p>${reason ? `<em>${reason}</em>` : c.id === 'alvarez' ? '<em>Moves plant growth experiment from 10:00 to 13:00 to avoid overlap.</em>' : '<p>Available for the full inspection window.</p>'}</label>`;
+        return `<label class="choice"><input type="radio" name="replacement" value="${c.id}" ${reason ? 'disabled' : c.id === selected?.id ? 'checked' : ''}><strong>${c.name} · ${c.role}</strong><p>${c.skills.join(' · ') || 'No skills listed'}</p>${reason ? `<em>${reason}</em>` : c.id === 'alvarez' ? '<em>Moves plant growth experiment from 10:00 to 13:00 to avoid overlap.</em>' : '<p>Available for the full inspection window.</p>'}</label>`;
       }).join('')}
       <label class="choice"><input type="radio" name="replacement" value="defer" ${commanderDown || !eligible.length ? 'checked' : ''}><strong>Defer the inspection</strong><p>Hold the task for crew review. Record the coverage gap in the Earth packet.</p></label>
       <div class="dialog-actions"><button type="button" class="button btn btn--secondary secondary" data-close>Cancel</button><button type="submit" class="button btn btn--primary primary">Confirm plan →</button></div>
@@ -367,10 +602,16 @@ function packetText() {
   return [
     'CREW SWAP / ARES / SOL 187',
     `MISSION PLAN VERSION ${state.version}`,
+    `Operator view: ${ROLES[state.operatorRole].label}`,
     dataLine,
     'Crew identities and schedule are simulated.',
     '',
-    `Duty review: ${state.crew.map(c => `${c.name}: ${statusLabel(c)} (${c.sleep} h sleep)`).join('; ')}`,
+    `Duty review: ${state.crew.map(c => {
+      const flags = crewFlags(c).map(f => f.label).join(', ');
+      return `${c.name}: ${statusLabel(c)} (${c.sleep} h sleep${flags ? `; flags: ${flags}` : ''})`;
+    }).join('; ')}`,
+    '',
+    `Cooling loop requires: ${state.requirements.coolingLoop.specialistSkills.join(', ')} + ${state.requirements.coolingLoop.commanderSkill}`,
     '',
     ...tasks().map(t => `${t.time} UTC | ${t.title} | ${t.status}\nCrew: ${t.crew.map(id => byId(id).name).join(', ') || 'Unassigned'}`),
     '',
@@ -394,7 +635,7 @@ function download(name, content, type = 'text/plain') {
 
 function openPacket() {
   showDialog('Earth handoff', 'ONBOARD DECISION / READY TO REVIEW', `
-    <p>The packet reflects current duty status and the latest mission plan.</p>
+    <p>The packet reflects current duty status, medical flags, and the latest mission plan.</p>
     <pre class="packet">${escapeText(packetText())}</pre>
     <div class="dialog-actions"><button class="button btn btn--secondary secondary" data-close>Close</button><button class="button btn btn--primary primary" id="download-packet">Download packet ↓</button></div>`);
   document.getElementById('download-packet').onclick = () => {
@@ -414,6 +655,16 @@ function openSources() {
     <div class="source-item"><a href="https://www.nasa.gov/news-release/nasa-coverage-of-rescheduled-spacewalk-preparing-for-new-solar-array/" target="_blank" rel="noopener">NASA · A real crew reassignment ↗</a><p>In 2021, Thomas Pesquet replaced Mark Vande Hei on a rescheduled spacewalk while Vande Hei provided internal support.</p></div>
     <div class="source-item"><a href="https://ntrs.nasa.gov/archive/nasa/casi.ntrs.nasa.gov/20140016946.pdf" target="_blank" rel="noopener">NASA · Fatigue in ISS astronauts ↗</a><p>Background on fatigue, sleep monitoring, and performance measures. Duty decisions in this preview are made by the operator.</p></div>
     <div class="dialog-actions"><button class="button btn btn--primary primary" data-close>Got it</button></div>`);
+}
+
+function switchRole(roleId) {
+  if (!ROLES[roleId]) return;
+  state.operatorRole = roleId;
+  const role = ROLES[roleId];
+  addLog(`Operator switched to ${role.label}`, role.heading);
+  render();
+  setView(role.defaultView);
+  toast(`${role.short} view · opens on ${role.defaultView === 'plan' ? 'Mission plan' : 'Crew health'}.`);
 }
 
 function bindEvents() {
@@ -436,7 +687,9 @@ function bindEvents() {
     const button = event.target.closest('[data-action]');
     if (button?.dataset.action === 'checkin') openCheckin();
     if (button?.dataset.action === 'status') openDuty();
+    if (button?.dataset.action === 'flags') openFlags();
   };
+  document.getElementById('role-select').onchange = event => switchRole(event.target.value);
   document.getElementById('new-checkin').onclick = openCheckin;
   document.getElementById('review-checkin').onclick = () => {
     if (tasks().some(t => t.status === 'Coverage gap')) return openCoverage();
@@ -453,7 +706,14 @@ function bindEvents() {
   document.getElementById('mobile-tools').onclick = () => {
     showDialog('Preview options', 'CREW SWAP', `
       <p>${sleepCatalog ? 'Sleep totals come from PhysioNet BIDSleep. Mission roles remain simulated.' : 'The interface currently uses sample crew health and mission data.'}</p>
+      <label class="field"><span>Operator role</span>
+        <select id="mobile-role">${Object.values(ROLES).map(r => `<option value="${r.id}" ${state.operatorRole === r.id ? 'selected' : ''}>${r.short} — ${r.label}</option>`).join('')}</select>
+      </label>
       <div class="dialog-actions"><button class="button btn btn--secondary secondary" id="mobile-reset">Reset preview</button><button class="button btn btn--primary primary" id="mobile-sources">Data & references</button></div>`);
+    document.getElementById('mobile-role').onchange = event => {
+      switchRole(event.target.value);
+      closeDialog();
+    };
     document.getElementById('mobile-sources').onclick = openSources;
     document.getElementById('mobile-reset').onclick = () => document.getElementById('reset-button').click();
   };
@@ -463,12 +723,14 @@ function bindEvents() {
   };
   document.getElementById('reset-button').onclick = () => {
     showDialog('Restart the preview?', 'SAMPLE MISSION', `
-      <p>This restores the four crew records from the loaded sleep dataset and clears locally saved decisions.</p>
+      <p>This restores the four crew records from the loaded sleep dataset and clears locally saved decisions, flags, and qualification edits.</p>
       <div class="dialog-actions"><button class="button btn btn--secondary secondary" data-close>Keep current plan</button><button class="button btn danger" id="confirm-reset">Reset preview</button></div>`);
     document.getElementById('confirm-reset').onclick = () => {
+      const role = state.operatorRole;
       state = freshState(sleepCatalog);
+      state.operatorRole = role;
       render();
-      setView('overview');
+      setView(ROLES[role].defaultView);
       closeDialog();
       toast('Preview restored.');
     };
@@ -494,7 +756,7 @@ async function boot() {
   state = readState(sleepCatalog);
   bindEvents();
   render();
-  setView('overview');
+  setView(ROLES[state.operatorRole].defaultView);
   if (sleepCatalog) {
     toast('Loaded measured sleep histories from PhysioNet BIDSleep.');
   }

@@ -235,6 +235,20 @@ nav { display: flex; flex-direction: column; gap: 3px }
   transition: background 0.2s var(--ease), color 0.2s var(--ease);
 }
 .text-button:hover { background: rgba(232, 235, 228, 0.05); color: var(--text) }
+.role-switch {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 0 2px 4px;
+}
+.role-switch select {
+  width: 100%;
+  padding: 9px 10px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: #0a0c10;
+  color: var(--text);
+}
 .operator {
   display: flex;
   align-items: center;
@@ -246,6 +260,107 @@ nav { display: flex; flex-direction: column; gap: 3px }
 }
 .operator strong { display: block; font-size: 13px }
 .operator span { color: var(--muted); font-size: 12px }
+.flag-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: -4px 0 12px;
+}
+.flag-chip {
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: rgba(212, 160, 106, 0.14);
+  color: var(--amber);
+  font: 500 9px/1.3 var(--font-mono);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.flag-block {
+  margin: 0 0 12px;
+  padding: 12px;
+  border-radius: 10px;
+  background: rgba(10, 12, 16, 0.45);
+  border: 1px solid var(--line);
+}
+.flag-block-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.flag-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+.flag-list li {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 13px;
+}
+.flag-list span { color: var(--muted); font-size: 12px }
+.quals-panel { margin-top: 8px; padding-bottom: 8px }
+.quals-body { padding: 0 18px 18px; display: grid; gap: 22px }
+.quals-block h3 {
+  margin: 0 0 8px;
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 500;
+}
+.skill-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 14px;
+}
+.skill-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: rgba(10, 12, 16, 0.55);
+  font-size: 13px;
+}
+.skill-chip:has(input:checked) {
+  border-color: rgba(142, 182, 196, 0.5);
+  background: rgba(142, 182, 196, 0.1);
+}
+.quals-table-wrap { overflow: auto; border: 1px solid var(--line); border-radius: 12px }
+.quals-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 720px;
+  font-size: 12px;
+}
+.quals-table th, .quals-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(232, 235, 228, 0.06);
+  text-align: center;
+}
+.quals-table thead th {
+  font: 500 10px/1.2 var(--font-mono);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+  background: rgba(10, 12, 16, 0.55);
+}
+.quals-table tbody th {
+  text-align: left;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.quals-table tbody th small {
+  display: block;
+  color: var(--muted);
+  font-weight: 400;
+  margin-top: 2px;
+}
 .avatar {
   display: grid;
   place-items: center;
@@ -927,6 +1042,13 @@ dialog::backdrop {
 .health-view .workspace { grid-template-columns: 1fr }
 .health-view .detail-main { max-width: 720px }
 .health-view .chart-area { height: 150px }
+.quals-view .fx-stage { opacity: 0.55 }
+
+.panel.quals-panel,
+.quals-panel {
+  background: var(--panel) !important;
+  background-image: none !important;
+}
 
 @keyframes orbit-spin { to { transform: rotate(360deg) } }
 
@@ -951,6 +1073,7 @@ dialog::backdrop {
   .mission-card,
   .nav-count,
   .operator > div,
+  .role-switch,
   .sidebar-bottom .text-button { display: none }
   .nav-item { justify-content: center; padding: 12px }
   .nav-item span:last-child { display: none }
