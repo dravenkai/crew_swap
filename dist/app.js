@@ -224,9 +224,13 @@ function setView(view) {
   document.getElementById('page-description').textContent = labels[view][2];
   document.body.classList.toggle('plan-view', view === 'plan');
   document.body.classList.toggle('health-view', view === 'health');
-  document.getElementById('crew-section').classList.toggle('hidden', view === 'log');
+  document.body.classList.toggle('overview-view', view === 'overview');
+  // Overview = crew + schedule + health. Health = crew + health only. Plan = schedule only. Log = decision log only.
+  document.getElementById('crew-section').classList.toggle('hidden', view === 'log' || view === 'plan');
   document.getElementById('workspace').classList.toggle('hidden', view === 'log');
   document.getElementById('log-panel').classList.toggle('hidden', view !== 'log');
+  document.getElementById('alert-banner').classList.toggle('hidden', view === 'log');
+  document.getElementById('new-checkin').classList.toggle('hidden', view === 'plan' || view === 'log');
 }
 
 const dialog = document.getElementById('dialog');
