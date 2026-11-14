@@ -39,3 +39,6 @@ Fetching `data/sleep.json` needs HTTP — open the app through the local server,
 - `dist/` — static UI, `favicon.svg`, and `data/sleep.json`
 - `server.cjs` — tiny static server on port 43730
 - `tools/import_sleep.py` — rebuilds sleep totals from BIDSleep `labels.mat` files under `/tmp/bidsleep`
+- `.agents/skills/design-taste-frontend` — [Taste Skill](https://www.tasteskill.dev/) (`design-taste-frontend`) for agent-led UI redesigns
+
+Ask the agent to use the **design-taste-frontend** skill when redesigning or polishing the UI.
