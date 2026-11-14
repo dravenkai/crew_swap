@@ -1,0 +1,284 @@
+{
+  "dataset": {
+    "name": "BIDSleep Dataset",
+    "version": "1.0.1",
+    "url": "https://physionet.org/content/bidsleep-dataset/1.0.1/",
+    "doi": "https://doi.org/10.13026/0kh5-0t28",
+    "license": "Open Data Commons Attribution License v1.0",
+    "notes": "Expert-reviewed sleep-stage labels from overnight wearable recordings. Total sleep time is derived from non-wake stages in 30-second epochs. These Earth sleep histories stand in for wearable crew sleep trends in the demo. Crew names, roles, qualifications, and the Mars mission schedule remain simulated."
+  },
+  "context": {
+    "nasa_reassignment": "https://www.nasa.gov/news-release/nasa-coverage-of-rescheduled-spacewalk-preparing-for-new-solar-array/",
+    "nasa_fatigue_research": "https://ntrs.nasa.gov/archive/nasa/casi.ntrs.nasa.gov/20140016946.pdf"
+  },
+  "crew": {
+    "chen": {
+      "id": "chen",
+      "subject": "Bidslab00",
+      "baseline_hours": 7.3,
+      "latest_hours": 4.97,
+      "deficit_hours": 2.33,
+      "history_hours": [
+        7.49,
+        7.42,
+        7.98,
+        7.12,
+        6.96,
+        6.81,
+        4.97
+      ],
+      "nights": [
+        {
+          "night": 1,
+          "sleep_hours": 7.49,
+          "recorded_at": "2021-12-02 23:11:25",
+          "epochs": 935,
+          "source_file": "Bidslab00/1/labels.mat"
+        },
+        {
+          "night": 2,
+          "sleep_hours": 7.42,
+          "recorded_at": "2021-12-04 00:31:56",
+          "epochs": 943,
+          "source_file": "Bidslab00/2/labels.mat"
+        },
+        {
+          "night": 3,
+          "sleep_hours": 7.98,
+          "recorded_at": "2021-12-04 23:40:29",
+          "epochs": 993,
+          "source_file": "Bidslab00/3/labels.mat"
+        },
+        {
+          "night": 4,
+          "sleep_hours": 7.12,
+          "recorded_at": "2021-12-06 23:36:31",
+          "epochs": 888,
+          "source_file": "Bidslab00/4/labels.mat"
+        },
+        {
+          "night": 5,
+          "sleep_hours": 6.96,
+          "recorded_at": "2021-12-07 23:34:53",
+          "epochs": 862,
+          "source_file": "Bidslab00/5/labels.mat"
+        },
+        {
+          "night": 6,
+          "sleep_hours": 6.81,
+          "recorded_at": "2021-12-08 23:39:13",
+          "epochs": 886,
+          "source_file": "Bidslab00/6/labels.mat"
+        },
+        {
+          "night": 7,
+          "sleep_hours": 4.97,
+          "recorded_at": "2021-12-11 23:34:23",
+          "epochs": 665,
+          "source_file": "Bidslab00/7/labels.mat"
+        }
+      ]
+    },
+    "ibarra": {
+      "id": "ibarra",
+      "subject": "Bidslab07",
+      "baseline_hours": 6.63,
+      "latest_hours": 6.14,
+      "deficit_hours": 0.49,
+      "history_hours": [
+        7.72,
+        6.5,
+        6.52,
+        7.1,
+        6.62,
+        5.35,
+        6.14
+      ],
+      "nights": [
+        {
+          "night": 1,
+          "sleep_hours": 7.72,
+          "recorded_at": "2022-02-01 22:52:17",
+          "epochs": 1066,
+          "source_file": "Bidslab07/1/labels.mat"
+        },
+        {
+          "night": 2,
+          "sleep_hours": 6.5,
+          "recorded_at": "2022-02-11 23:25:29",
+          "epochs": 891,
+          "source_file": "Bidslab07/2/labels.mat"
+        },
+        {
+          "night": 3,
+          "sleep_hours": 6.52,
+          "recorded_at": "2022-02-12 23:38:53",
+          "epochs": 861,
+          "source_file": "Bidslab07/3/labels.mat"
+        },
+        {
+          "night": 4,
+          "sleep_hours": 7.1,
+          "recorded_at": "2022-02-13 22:32:23",
+          "epochs": 980,
+          "source_file": "Bidslab07/4/labels.mat"
+        },
+        {
+          "night": 5,
+          "sleep_hours": 6.62,
+          "recorded_at": "2022-03-28 00:56:58",
+          "epochs": 833,
+          "source_file": "Bidslab07/5/labels.mat"
+        },
+        {
+          "night": 6,
+          "sleep_hours": 5.35,
+          "recorded_at": "2022-04-01 01:24:54",
+          "epochs": 758,
+          "source_file": "Bidslab07/6/labels.mat"
+        },
+        {
+          "night": 7,
+          "sleep_hours": 6.14,
+          "recorded_at": "2022-04-12 01:03:26",
+          "epochs": 766,
+          "source_file": "Bidslab07/7/labels.mat"
+        }
+      ]
+    },
+    "alvarez": {
+      "id": "alvarez",
+      "subject": "Bidslab16",
+      "baseline_hours": 6.07,
+      "latest_hours": 6.62,
+      "deficit_hours": -0.55,
+      "history_hours": [
+        5.49,
+        5.8,
+        7.43,
+        5.39,
+        7.07,
+        5.22,
+        6.62
+      ],
+      "nights": [
+        {
+          "night": 1,
+          "sleep_hours": 5.49,
+          "recorded_at": "2022-03-01 23:29:13",
+          "epochs": 847,
+          "source_file": "Bidslab16/1/labels.mat"
+        },
+        {
+          "night": 2,
+          "sleep_hours": 5.8,
+          "recorded_at": "2022-03-03 00:43:09",
+          "epochs": 788,
+          "source_file": "Bidslab16/2/labels.mat"
+        },
+        {
+          "night": 3,
+          "sleep_hours": 7.43,
+          "recorded_at": "2022-03-05 22:45:04",
+          "epochs": 1006,
+          "source_file": "Bidslab16/3/labels.mat"
+        },
+        {
+          "night": 4,
+          "sleep_hours": 5.39,
+          "recorded_at": "2022-03-07 00:41:13",
+          "epochs": 795,
+          "source_file": "Bidslab16/4/labels.mat"
+        },
+        {
+          "night": 5,
+          "sleep_hours": 7.07,
+          "recorded_at": "2022-03-08 22:59:32",
+          "epochs": 986,
+          "source_file": "Bidslab16/5/labels.mat"
+        },
+        {
+          "night": 6,
+          "sleep_hours": 5.22,
+          "recorded_at": "2022-03-10 00:40:38",
+          "epochs": 802,
+          "source_file": "Bidslab16/6/labels.mat"
+        },
+        {
+          "night": 7,
+          "sleep_hours": 6.62,
+          "recorded_at": "2022-03-10 22:22:07",
+          "epochs": 1044,
+          "source_file": "Bidslab16/7/labels.mat"
+        }
+      ]
+    },
+    "okonkwo": {
+      "id": "okonkwo",
+      "subject": "Bidslab30",
+      "baseline_hours": 6.51,
+      "latest_hours": 6.52,
+      "deficit_hours": -0.01,
+      "history_hours": [
+        7.28,
+        6.09,
+        6.79,
+        6.53,
+        5.81,
+        6.58,
+        6.52
+      ],
+      "nights": [
+        {
+          "night": 1,
+          "sleep_hours": 7.28,
+          "recorded_at": "2021-07-31 01:42:12",
+          "epochs": 894,
+          "source_file": "Bidslab30/1/labels.mat"
+        },
+        {
+          "night": 2,
+          "sleep_hours": 6.09,
+          "recorded_at": "2021-08-01 02:11:46",
+          "epochs": 867,
+          "source_file": "Bidslab30/2/labels.mat"
+        },
+        {
+          "night": 3,
+          "sleep_hours": 6.79,
+          "recorded_at": "2021-08-02 00:40:25",
+          "epochs": 894,
+          "source_file": "Bidslab30/3/labels.mat"
+        },
+        {
+          "night": 4,
+          "sleep_hours": 6.53,
+          "recorded_at": "2021-08-05 00:12:43",
+          "epochs": 911,
+          "source_file": "Bidslab30/4/labels.mat"
+        },
+        {
+          "night": 5,
+          "sleep_hours": 5.81,
+          "recorded_at": "2021-08-06 00:56:29",
+          "epochs": 766,
+          "source_file": "Bidslab30/5/labels.mat"
+        },
+        {
+          "night": 6,
+          "sleep_hours": 6.58,
+          "recorded_at": "2021-08-08 01:22:08",
+          "epochs": 851,
+          "source_file": "Bidslab30/6/labels.mat"
+        },
+        {
+          "night": 7,
+          "sleep_hours": 6.52,
+          "recorded_at": "2021-08-08 23:50:23",
+          "epochs": 877,
+          "source_file": "Bidslab30/7/labels.mat"
+        }
+      ]
+    }
+  }
+}

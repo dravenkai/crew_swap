@@ -1,0 +1,11 @@
+{
+  "name": "crew-swap",
+  "version": "1.1.0",
+  "private": true,
+  "description": "Crew health check-ins and mission replanning with measured sleep trends",
+  "scripts": {
+    "start": "node server.cjs",
+    "check": "node --check dist/app.js",
+    "import-sleep": "python3 tools/import_sleep.py"
+  }
+}
