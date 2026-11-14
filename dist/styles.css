@@ -531,14 +531,21 @@ main {
   gap: 16px;
   margin-top: 6px;
 }
-.panel {
-  background: var(--panel);
+.panel,
+.schedule-panel,
+.health-panel,
+.log-panel {
+  background: var(--panel) !important;
+  background-image: none !important;
   border: 1px solid var(--line);
   border-radius: 14px;
   box-shadow: var(--shadow);
   overflow: hidden;
   backdrop-filter: blur(12px);
+  color: var(--text);
 }
+.panel::before,
+.panel::after { display: none !important }
 .panel-header {
   display: flex;
   align-items: flex-start;
