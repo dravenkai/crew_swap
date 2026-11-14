@@ -27,6 +27,7 @@ const ROLES = {
     label: 'Crew medical officer',
     short: 'A. Okonkwo',
     initials: 'AO',
+    crewId: 'okonkwo',
     defaultView: 'health',
     heading: 'Start with crew health.'
   },
@@ -35,10 +36,18 @@ const ROLES = {
     label: 'Commander',
     short: 'S. Ibarra',
     initials: 'SI',
+    crewId: 'ibarra',
     defaultView: 'plan',
     heading: 'Start with the mission plan.'
   }
 };
+
+const crewPhoto = id => `assets/crew/${id}.jpg`;
+const avatarHtml = (c, size = '') => {
+  const cls = size ? `avatar ${size}` : 'avatar';
+  return `<span class="${cls}" title="${escapeText(c.fullName || c.name)}"><img src="${crewPhoto(c.id)}" alt="${escapeText(c.fullName || c.name)}" width="76" height="76" loading="lazy" decoding="async"></span>`;
+};
+const tinyAvatarHtml = c => `<span class="tiny-avatar" title="${escapeText(c.name)}"><img src="${crewPhoto(c.id)}" alt="" width="40" height="40" loading="lazy" decoding="async"></span>`;
 
 const storageKey = 'crew-swap-data-v3';
 let sleepCatalog = null;
@@ -182,7 +191,8 @@ function flagBlocks(c, kind) {
 
 function renderOperator() {
   const role = ROLES[state.operatorRole];
-  document.getElementById('operator-avatar').textContent = role.initials;
+  const avatar = document.getElementById('operator-avatar');
+  avatar.innerHTML = `<img src="${crewPhoto(role.crewId)}" alt="${escapeText(role.short)}" width="60" height="60" decoding="async">`;
   document.getElementById('operator-name').textContent = role.short;
   document.getElementById('operator-role').textContent = role.label;
   document.getElementById('role-select').value = state.operatorRole;
@@ -193,7 +203,7 @@ function renderCrew() {
     const flags = crewFlags(c);
     return `
     <button class="crew-card card ${state.selected === c.id ? 'selected' : ''}" data-crew="${c.id}" aria-pressed="${state.selected === c.id}" aria-label="Review ${escapeText(c.fullName)}, ${statusLabel(c)}">
-      <div class="crew-card-top"><span class="avatar">${c.initials}</span><div><h3>${c.name}</h3><div class="crew-role">${c.role}</div></div></div>
+      <div class="crew-card-top">${avatarHtml(c)}<div><h3>${c.name}</h3><div class="crew-role">${c.role}</div></div></div>
       <div class="crew-status ${c.state}"><i class="dot ${c.state === 'review' ? 'amber' : c.state === 'down' ? 'gray' : 'green'}"></i>${statusLabel(c)}</div>
       ${flags.length ? `<div class="flag-row">${flags.map(f => `<span class="flag-chip">${escapeText(f.label)}</span>`).join('')}</div>` : ''}
       <div class="crew-metrics">
@@ -214,7 +224,7 @@ function renderHealth() {
     : 'Sample sleep history for interface review.';
   const flags = crewFlags(c);
   document.getElementById('health-panel').innerHTML = `
-    <div class="panel-header"><div><span class="eyebrow">CREW HEALTH / ${c.initials}</span><h2>${c.name}’s check-in</h2></div><span class="focus-tag">${c.state === 'review' ? 'NEEDS REVIEW' : c.state === 'down' ? 'STAND-DOWN' : 'AVAILABLE'}</span></div>
+    <div class="panel-header"><div class="health-identity">${avatarHtml(c, 'large')}<div><span class="eyebrow">CREW HEALTH / ${c.initials}</span><h2>${c.name}’s check-in</h2></div></div><span class="focus-tag">${c.state === 'review' ? 'NEEDS REVIEW' : c.state === 'down' ? 'STAND-DOWN' : 'AVAILABLE'}</span></div>
     <div class="detail-main">
       <div class="detail-intro"><span>Reported at ${escapeText(c.time)} UTC</span><span>${Number(delta) > 0 ? '+' : ''}${delta} h from usual sleep</span></div>
       <figure class="sleep-figure" aria-label="Seven nights of sleep: ${c.history.join(', ')} hours. Personal baseline ${c.baseline} hours.">
@@ -267,7 +277,7 @@ function renderQualifications() {
             <tbody>
               ${state.crew.map(c => `
                 <tr>
-                  <th scope="row">${escapeText(c.name)}<small>${escapeText(c.role)}</small></th>
+                  <th scope="row"><span class="qual-crew">${avatarHtml(c, 'small')}<span>${escapeText(c.name)}<small>${escapeText(c.role)}</small></span></span></th>
                   ${ALL_SKILLS.map(skill => `
                     <td><input type="checkbox" data-crew-skill="${c.id}" value="${escapeText(skill)}" ${c.skills.includes(skill) ? 'checked' : ''} aria-label="${escapeText(c.name)} ${escapeText(skill)}"></td>
                   `).join('')}
@@ -344,7 +354,7 @@ function renderSchedule() {
       <div class="task-box">
         <div class="task-top"><strong>${t.title}</strong><span class="task-badge">${t.status.toUpperCase()}</span></div>
         <div class="task-bottom">
-          <span class="task-crew">${t.crew.map(id => `<span class="tiny-avatar" title="${byId(id).name}">${byId(id).initials}</span>`).join('')}<span>${t.crew.map(id => byId(id).name).join(' + ') || 'No available crew'}</span></span>
+          <span class="task-crew">${t.crew.map(id => tinyAvatarHtml(byId(id))).join('')}<span>${t.crew.map(id => byId(id).name).join(' + ') || 'No available crew'}</span></span>
           <span>${t.duration}</span>
         </div>
       </div>
