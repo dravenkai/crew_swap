@@ -395,31 +395,6 @@ main {
 .alert-banner strong { display: block; font-size: 15px }
 .alert-banner p { margin: 4px 0 0; color: var(--muted); font-size: 14px }
 
-.moment-band {
-  margin: 0 0 28px;
-  padding: 28px 24px;
-  border-radius: 22px;
-  background: var(--p-inv-bg);
-  color: var(--p-inv-ink);
-  overflow: hidden;
-  position: relative;
-}
-.moment-band__inner { position: relative; z-index: 1 }
-.moment-statement {
-  margin: 0;
-  font-family: var(--font-display);
-  font-size: clamp(40px, 7vw, 84px);
-  font-weight: 400;
-  letter-spacing: var(--display-tracking-xl);
-  line-height: 0.95;
-}
-.moment-lead {
-  margin: 14px 0 0;
-  max-width: 36ch;
-  color: var(--p-inv-muted);
-  font-size: 16px;
-}
-
 .section-heading {
   display: flex;
   align-items: center;
@@ -1085,7 +1060,6 @@ dialog::backdrop {
   .crew-grid { grid-template-columns: 1fr 1fr; gap: 10px }
   .field-row, .review-summary { grid-template-columns: 1fr }
   .toast { left: 50%; bottom: 84px }
-  .moment-statement { font-size: 36px }
   .strip-end { display: none }
   .alert-banner { flex-wrap: wrap }
   .alert-banner .button { width: 100% }
