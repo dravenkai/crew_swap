@@ -89,7 +89,7 @@ function dataBadge() {
 
 function renderCrew() {
   document.getElementById('crew-grid').innerHTML = state.crew.map(c => `
-    <button class="crew-card ${state.selected === c.id ? 'selected' : ''}" data-crew="${c.id}" aria-pressed="${state.selected === c.id}" aria-label="Review ${escapeText(c.fullName)}, ${statusLabel(c)}">
+    <button class="crew-card card ${state.selected === c.id ? 'selected' : ''}" data-crew="${c.id}" aria-pressed="${state.selected === c.id}" aria-label="Review ${escapeText(c.fullName)}, ${statusLabel(c)}">
       <div class="crew-card-top"><span class="avatar">${c.initials}</span><div><h3>${c.name}</h3><div class="crew-role">${c.role}</div></div></div>
       <div class="crew-status ${c.state}"><i class="dot ${c.state === 'review' ? 'amber' : c.state === 'down' ? 'gray' : 'green'}"></i>${statusLabel(c)}</div>
       <div class="crew-metrics">
@@ -119,7 +119,7 @@ function renderHealth() {
       <blockquote class="quote">“${escapeText(c.note)}”<small>${c.name.toUpperCase()} · SELF-REPORTED</small></blockquote>
       <p class="health-footnote">${sourceLine}</p>
       <div class="health-actions">
-        <button class="button secondary" data-action="checkin">Update check-in</button>
+        <button class="button btn btn--secondary secondary" data-action="checkin">Update check-in</button>
         <button class="button ${c.state === 'down' ? 'primary' : 'danger'}" data-action="status">${c.state === 'down' ? 'Review return to duty' : 'Review duty status'}</button>
       </div>
       <p class="health-footnote">Duty changes require confirmation by the crew medical officer.</p>
@@ -255,7 +255,7 @@ function openCheckin() {
         <label class="field"><span>Fatigue <output id="fatigue-output">${c.fatigue}</output> / 10</span><input name="fatigue" type="range" min="0" max="10" value="${c.fatigue}"><small>0 · None &nbsp; 10 · Extreme</small></label>
       </div>
       <label class="field"><span>How are you feeling?</span><textarea name="note" maxlength="300" required>${escapeText(c.note)}</textarea></label>
-      <div class="dialog-actions"><button type="button" class="button secondary" data-close>Cancel</button><button class="button primary" type="submit">Save check-in →</button></div>
+      <div class="dialog-actions"><button type="button" class="button btn btn--secondary secondary" data-close>Cancel</button><button class="button btn btn--primary primary" type="submit">Save check-in →</button></div>
     </form>`);
   const form = document.getElementById('checkin-form');
   form.elements.fatigue.addEventListener('input', () => {
@@ -299,8 +299,8 @@ function openDuty() {
     ${measured}
     <p>Standing down removes ${c.name} from available coverage. Existing assignments will be flagged for replanning.</p>
     <div class="dialog-actions">
-      <button class="button secondary" id="confirm-available">Confirm available</button>
-      <button class="button danger" id="confirm-down" ${c.state === 'down' ? 'disabled' : ''}>Confirm stand-down →</button>
+      <button class="button btn btn--secondary secondary" id="confirm-available">Confirm available</button>
+      <button class="button btn danger" id="confirm-down" ${c.state === 'down' ? 'disabled' : ''}>Confirm stand-down →</button>
     </div>`);
   document.getElementById('confirm-available').onclick = () => {
     c.state = 'available';
@@ -338,7 +338,7 @@ function openCoverage() {
         return `<label class="choice"><input type="radio" name="replacement" value="${c.id}" ${reason ? 'disabled' : c.id === selected?.id ? 'checked' : ''}><strong>${c.name} · ${c.role}</strong><p>${c.skills.join(' · ')}</p>${reason ? `<em>${reason}</em>` : c.id === 'alvarez' ? '<em>Moves plant growth experiment from 10:00 to 13:00 to avoid overlap.</em>' : '<p>Available for the full inspection window.</p>'}</label>`;
       }).join('')}
       <label class="choice"><input type="radio" name="replacement" value="defer" ${commanderDown || !eligible.length ? 'checked' : ''}><strong>Defer the inspection</strong><p>Hold the task for crew review. Record the coverage gap in the Earth packet.</p></label>
-      <div class="dialog-actions"><button type="button" class="button secondary" data-close>Cancel</button><button type="submit" class="button primary">Confirm plan →</button></div>
+      <div class="dialog-actions"><button type="button" class="button btn btn--secondary secondary" data-close>Cancel</button><button type="submit" class="button btn btn--primary primary">Confirm plan →</button></div>
     </form>`);
   document.getElementById('coverage-form').onsubmit = event => {
     event.preventDefault();
@@ -355,7 +355,7 @@ function openCoverage() {
     showDialog('Plan updated.', 'CONFIRMED BY A. OKONKWO', `
       <p>${escapeText(description)}</p>
       <div class="plan-notice">${state.crew.filter(c => c.state === 'down').map(c => c.name).join(', ') || 'No crew'} ${state.crew.some(c => c.state === 'down') ? 'currently stood down. Review return to duty when appropriate.' : 'currently stood down.'}</div>
-      <div class="dialog-actions"><button class="button secondary" data-close>Back to overview</button><button class="button primary" id="show-packet">Review Earth packet →</button></div>`);
+      <div class="dialog-actions"><button class="button btn btn--secondary secondary" data-close>Back to overview</button><button class="button btn btn--primary primary" id="show-packet">Review Earth packet →</button></div>`);
     document.getElementById('show-packet').onclick = openPacket;
   };
 }
@@ -396,7 +396,7 @@ function openPacket() {
   showDialog('Earth handoff', 'ONBOARD DECISION / READY TO REVIEW', `
     <p>The packet reflects current duty status and the latest mission plan.</p>
     <pre class="packet">${escapeText(packetText())}</pre>
-    <div class="dialog-actions"><button class="button secondary" data-close>Close</button><button class="button primary" id="download-packet">Download packet ↓</button></div>`);
+    <div class="dialog-actions"><button class="button btn btn--secondary secondary" data-close>Close</button><button class="button btn btn--primary primary" id="download-packet">Download packet ↓</button></div>`);
   document.getElementById('download-packet').onclick = () => {
     download('crew-swap-earth-packet.txt', packetText());
     toast('Earth packet downloaded.');
@@ -413,7 +413,7 @@ function openSources() {
     ${sleepBlock}
     <div class="source-item"><a href="https://www.nasa.gov/news-release/nasa-coverage-of-rescheduled-spacewalk-preparing-for-new-solar-array/" target="_blank" rel="noopener">NASA · A real crew reassignment ↗</a><p>In 2021, Thomas Pesquet replaced Mark Vande Hei on a rescheduled spacewalk while Vande Hei provided internal support.</p></div>
     <div class="source-item"><a href="https://ntrs.nasa.gov/archive/nasa/casi.ntrs.nasa.gov/20140016946.pdf" target="_blank" rel="noopener">NASA · Fatigue in ISS astronauts ↗</a><p>Background on fatigue, sleep monitoring, and performance measures. Duty decisions in this preview are made by the operator.</p></div>
-    <div class="dialog-actions"><button class="button primary" data-close>Got it</button></div>`);
+    <div class="dialog-actions"><button class="button btn btn--primary primary" data-close>Got it</button></div>`);
 }
 
 function bindEvents() {
@@ -453,7 +453,7 @@ function bindEvents() {
   document.getElementById('mobile-tools').onclick = () => {
     showDialog('Preview options', 'CREW SWAP', `
       <p>${sleepCatalog ? 'Sleep totals come from PhysioNet BIDSleep. Mission roles remain simulated.' : 'The interface currently uses sample crew health and mission data.'}</p>
-      <div class="dialog-actions"><button class="button secondary" id="mobile-reset">Reset preview</button><button class="button primary" id="mobile-sources">Data & references</button></div>`);
+      <div class="dialog-actions"><button class="button btn btn--secondary secondary" id="mobile-reset">Reset preview</button><button class="button btn btn--primary primary" id="mobile-sources">Data & references</button></div>`);
     document.getElementById('mobile-sources').onclick = openSources;
     document.getElementById('mobile-reset').onclick = () => document.getElementById('reset-button').click();
   };
@@ -464,7 +464,7 @@ function bindEvents() {
   document.getElementById('reset-button').onclick = () => {
     showDialog('Restart the preview?', 'SAMPLE MISSION', `
       <p>This restores the four crew records from the loaded sleep dataset and clears locally saved decisions.</p>
-      <div class="dialog-actions"><button class="button secondary" data-close>Keep current plan</button><button class="button danger" id="confirm-reset">Reset preview</button></div>`);
+      <div class="dialog-actions"><button class="button btn btn--secondary secondary" data-close>Keep current plan</button><button class="button btn danger" id="confirm-reset">Reset preview</button></div>`);
     document.getElementById('confirm-reset').onclick = () => {
       state = freshState(sleepCatalog);
       render();

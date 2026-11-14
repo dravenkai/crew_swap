@@ -1,0 +1,25 @@
+{
+  "moments": [
+    {
+      "id": "letters-assemble",
+      "at": "2026-11-14T07:21:08.262Z",
+      "seed": "e674b62d"
+    },
+    {
+      "id": "iris-opens",
+      "at": "2026-11-14T07:21:08.262Z",
+      "seed": "e674b62d"
+    }
+  ],
+  "palettes": [
+    "cool-grey-cobalt"
+  ],
+  "types": [
+    "gabarito"
+  ],
+  "dealt": [
+    "gabarito",
+    "instrument",
+    "host"
+  ]
+}

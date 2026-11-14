@@ -1,0 +1,11 @@
+{
+ "page": "dist/index.html",
+ "url": null,
+ "root": "dist",
+ "kind": "software",
+ "category": "crew mission readiness console",
+ "primary": "Review check-in",
+ "rounds": 3,
+ "start": "2026-11-14T07:21:04.176Z",
+ "by": "gate.mjs --start"
+}

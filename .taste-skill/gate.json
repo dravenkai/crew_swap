@@ -1,0 +1,30 @@
+{
+ "start": "2026-11-14T07:21:04.176Z",
+ "round": 0,
+ "idle": 0,
+ "errors": 0,
+ "status": "done",
+ "history": [
+  {
+   "at": "2026-11-14T07:25:59.326Z",
+   "mode": "done",
+   "status": "done",
+   "reason": "Existing product console redesign with dealt cool-grey-cobalt / gabarito / aurora-curtains / letters-assemble; interactive stand-down flow preserved",
+   "round": 0
+  }
+ ],
+ "max": 3,
+ "marker": {
+  "page": "dist/index.html",
+  "url": null,
+  "root": "dist",
+  "kind": "software",
+  "category": "crew mission readiness console",
+  "primary": "Review check-in",
+  "rounds": 3,
+  "start": "2026-11-14T07:21:04.176Z",
+  "by": "gate.mjs --start"
+ },
+ "doneReason": "Existing product console redesign with dealt cool-grey-cobalt / gabarito / aurora-curtains / letters-assemble; interactive stand-down flow preserved",
+ "at": "2026-11-14T07:25:59.326Z"
+}
