@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="en" data-type="software" data-radius="soft" data-buttons="pill" data-motion data-ground="sky">
+<html lang="en" data-type="software" data-radius="soft" data-buttons="pill" data-motion data-ground="deep">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#eef0f3">
+  <meta name="theme-color" content="#0a0c10">
   <title>Crew Swap — Mission readiness console</title>
   <meta name="description" content="Review measured sleep, confirm a stand-down, and replan cooling-loop coverage before Earth hears about it.">
   <meta name="site-kind" content="software">
@@ -11,7 +11,7 @@
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Gabarito:wght@400..700&family=Figtree:wght@400..600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Host+Grotesk:wght@400..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/ui/cards.css">
   <link rel="stylesheet" href="assets/motion/motion.css">
   <link rel="stylesheet" href="assets/backgrounds/backgrounds.css">
@@ -19,7 +19,7 @@
   <script>document.documentElement.classList.add('m-enter');setTimeout(()=>document.documentElement.classList.add('m-enter-done'),700)</script>
 </head>
 <body>
-  <!-- deal: palette cool-grey-cobalt · type gabarito · effect aurora-curtains · pill · radius soft -->
+  <!-- brand dark space: bg #0a0c10 surface #12161c ink #e8ebe4 accent #8eb6c4 · type host · effect aurora-curtains · pill · soft · brief forbids light default -->
   <a class="skip-link" href="#main">Skip to console</a>
 
   <aside class="sidebar" data-enter>
@@ -56,9 +56,9 @@
     <div class="fx-stage hero section--hero" aria-hidden="true">
       <div class="fx-panel"
            data-fx="aurora-curtains"
-           data-fx-seed="17"
-           data-fx-palette='{"bg":"#eef0f3","surface":"#e2e5ea","ink":"#0b0c0e","muted":"#5d6470","accent":"#1f2de6"}'
-           data-fx-params='{"speed":0.04,"bands":3,"height":0.55,"intensity":0.85,"stars":0,"calm":0.72,"calmX":0.55,"calmY":0.45}'></div>
+           data-fx-seed="29"
+           data-fx-palette='{"bg":"#0a0c10","surface":"#12161c","ink":"#e8ebe4","muted":"#8b939e","accent":"#8eb6c4"}'
+           data-fx-params='{"speed":0.035,"bands":3,"height":0.62,"intensity":1.05,"stars":0.45,"calm":0.78,"calmX":0.5,"calmY":0.55}'></div>
     </div>
 
     <header class="topbar">
