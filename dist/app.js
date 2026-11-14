@@ -29,7 +29,7 @@ const ROLES = {
     initials: 'AO',
     crewId: 'okonkwo',
     defaultView: 'health',
-    heading: 'Start with crew health.'
+    heading: 'Health view'
   },
   commander: {
     id: 'commander',
@@ -38,7 +38,7 @@ const ROLES = {
     initials: 'SI',
     crewId: 'ibarra',
     defaultView: 'plan',
-    heading: 'Start with the mission plan.'
+    heading: 'Plan view'
   }
 };
 
@@ -58,7 +58,7 @@ let toastTimer;
 const byId = id => state.crew.find(c => c.id === id);
 const escapeText = value => String(value).replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 const clock = () => new Date().toISOString().slice(11, 16);
-const statusLabel = c => c.state === 'down' ? 'Stand-down confirmed' : c.state === 'review' ? 'Check-in needs review' : 'Available';
+const statusLabel = c => c.state === 'down' ? 'Stand-down' : c.state === 'review' ? 'Needs review' : 'Available';
 const flagMeta = id => FLAG_OPTIONS.find(f => f.id === id);
 const crewFlags = c => (c.flags || []).map(flagMeta).filter(Boolean);
 
@@ -181,8 +181,8 @@ function toast(message) {
 }
 
 function dataBadge() {
-  if (!sleepCatalog) return 'UI PREVIEW · SAMPLE CREW';
-  return 'MEASURED SLEEP · PHYSIONET BIDSLEEP';
+  if (!sleepCatalog) return 'Sample';
+  return 'BIDSleep';
 }
 
 function flagBlocks(c, kind) {
@@ -207,44 +207,39 @@ function renderCrew() {
       <div class="crew-status ${c.state}"><i class="dot ${c.state === 'review' ? 'amber' : c.state === 'down' ? 'gray' : 'green'}"></i>${statusLabel(c)}</div>
       ${flags.length ? `<div class="flag-row">${flags.map(f => `<span class="flag-chip">${escapeText(f.label)}</span>`).join('')}</div>` : ''}
       <div class="crew-metrics">
-        <div><span class="metric-label">Last night’s sleep</span><span class="metric-value ${c.sleep < c.baseline - 1 ? 'warning' : ''}">${c.sleep.toFixed(2)}<small>h</small></span></div>
-        <div><span class="metric-label">Reported fatigue</span><span class="metric-value ${c.fatigue >= 6 ? 'warning' : ''}">${c.fatigue}<small>/ 10</small></span></div>
+        <div><span class="metric-label">Sleep</span><span class="metric-value ${c.sleep < c.baseline - 1 ? 'warning' : ''}">${c.sleep.toFixed(1)}<small>h</small></span></div>
+        <div><span class="metric-label">Fatigue</span><span class="metric-value ${c.fatigue >= 6 ? 'warning' : ''}">${c.fatigue}<small>/10</small></span></div>
       </div>
       <div class="mini-trend" aria-hidden="true">${c.history.map(v => `<span style="--bar:${Math.max(10, v / 9 * 100)}%"></span>`).join('')}</div>
-      <div class="crew-foot"><span>7-NIGHT SLEEP TREND</span><span>CHECK-IN ${escapeText(c.time)}</span></div>
+      <div class="crew-foot"><span>${escapeText(c.time)}</span></div>
     </button>`;
   }).join('');
 }
 
 function renderHealth() {
   const c = byId(state.selected);
-  const delta = (c.sleep - c.baseline).toFixed(2);
-  const sourceLine = c.subject
-    ? `Measured total sleep from PhysioNet BIDSleep subject ${escapeText(c.subject)}. Crew identity and mission duties remain simulated.`
-    : 'Sample sleep history for interface review.';
+  const delta = (c.sleep - c.baseline).toFixed(1);
   const flags = crewFlags(c);
   document.getElementById('health-panel').innerHTML = `
-    <div class="panel-header"><div class="health-identity">${avatarHtml(c, 'large')}<div><span class="eyebrow">CREW HEALTH / ${c.initials}</span><h2>${c.name}’s check-in</h2></div></div><span class="focus-tag">${c.state === 'review' ? 'NEEDS REVIEW' : c.state === 'down' ? 'STAND-DOWN' : 'AVAILABLE'}</span></div>
+    <div class="panel-header"><div class="health-identity">${avatarHtml(c, 'large')}<div><h2>${c.name}</h2></div></div><span class="focus-tag">${c.state === 'review' ? 'REVIEW' : c.state === 'down' ? 'DOWN' : 'READY'}</span></div>
     <div class="detail-main">
-      <div class="detail-intro"><span>Reported at ${escapeText(c.time)} UTC</span><span>${Number(delta) > 0 ? '+' : ''}${delta} h from usual sleep</span></div>
+      <div class="detail-intro"><span>${escapeText(c.time)} UTC</span><span>${Number(delta) > 0 ? '+' : ''}${delta} h vs usual</span></div>
       <figure class="sleep-figure" aria-label="Seven nights of sleep: ${c.history.join(', ')} hours. Personal baseline ${c.baseline} hours.">
-        <div class="chart-title">Sleep over the last 7 nights <span>— USUAL ${c.baseline} H</span></div>
+        <div class="chart-title">7-night sleep <span>usual ${c.baseline} h</span></div>
         <div class="chart-area"><div class="baseline" style="top:${100 - c.baseline / 9 * 100}%"></div>${c.history.map(v => `<div class="chart-bar" style="--height:${v / 9 * 100}%"><span>${Number(v).toFixed(1)}</span></div>`).join('')}</div>
         <div class="chart-days">${[181,182,183,184,185,186,187].map(d => `<span>${d}</span>`).join('')}</div>
       </figure>
-      <blockquote class="quote">“${escapeText(c.note)}”<small>${c.name.toUpperCase()} · SELF-REPORTED</small></blockquote>
+      <blockquote class="quote">“${escapeText(c.note)}”</blockquote>
       <div class="flag-block">
-        <div class="flag-block-head"><span class="metric-label">Medical flags</span><button type="button" class="text-link" data-action="flags">Edit flags →</button></div>
+        <div class="flag-block-head"><span class="metric-label">Flags</span><button type="button" class="text-link" data-action="flags">Edit →</button></div>
         ${flags.length
-          ? `<ul class="flag-list">${flags.map(f => `<li><strong>${escapeText(f.label)}</strong><span>Blocks ${f.blocks.join(' · ')}</span></li>`).join('')}</ul>`
-          : '<p class="health-footnote">No medical flags on record.</p>'}
+          ? `<ul class="flag-list">${flags.map(f => `<li><strong>${escapeText(f.label)}</strong></li>`).join('')}</ul>`
+          : '<p class="health-footnote">None</p>'}
       </div>
-      <p class="health-footnote">${sourceLine}</p>
       <div class="health-actions">
-        <button class="button btn btn--secondary secondary" data-action="checkin">Update check-in</button>
-        <button class="button ${c.state === 'down' ? 'primary' : 'danger'}" data-action="status">${c.state === 'down' ? 'Review return to duty' : 'Review duty status'}</button>
+        <button class="button btn btn--secondary secondary" data-action="checkin">Check-in</button>
+        <button class="button ${c.state === 'down' ? 'primary' : 'danger'}" data-action="status">${c.state === 'down' ? 'Return to duty' : 'Duty status'}</button>
       </div>
-      <p class="health-footnote">Duty changes require confirmation by the crew medical officer.</p>
     </div>`;
 }
 
@@ -253,13 +248,11 @@ function renderQualifications() {
   const panel = document.getElementById('qualifications-panel');
   panel.innerHTML = `
     <div class="panel-header">
-      <div><span class="eyebrow">MISSION INPUTS</span><h2>Qualification matrix</h2></div>
-      <button class="button btn btn--secondary secondary" id="save-quals-hint" type="button" disabled>Edits save as you go</button>
+      <div><h2>Qualifications</h2></div>
     </div>
     <div class="quals-body">
       <section class="quals-block">
-        <h3>Cooling loop requirements</h3>
-        <p class="health-footnote">Who can cover the 09:30 inspection. Specialist skills and the commander skill are editable.</p>
+        <h3>Cooling loop</h3>
         <div class="skill-chips" id="req-specialist">
           ${ALL_SKILLS.map(skill => `
             <label class="skill-chip"><input type="checkbox" data-req="specialist" value="${escapeText(skill)}" ${req.specialistSkills.includes(skill) ? 'checked' : ''}> ${escapeText(skill)}</label>
@@ -359,11 +352,12 @@ function renderSchedule() {
         </div>
       </div>
     </div>`).join('');
-  document.getElementById('version-label').textContent = `VERSION ${String(state.version).padStart(2, '0')}`;
-  document.getElementById('coverage-label').textContent = `${list.filter(t => t.status !== 'Deferred').length} active tasks · ${list.filter(t => t.status === 'Coverage gap').length} coverage gaps`;
-  document.getElementById('plan-footer').textContent = state.version > 1
-    ? 'Plan updated onboard. Changes are recorded in the decision log.'
-    : 'Review crew health before the next operation.';
+  const gaps = list.filter(t => t.status === 'Coverage gap').length;
+  document.getElementById('version-label').textContent = `v${String(state.version).padStart(2, '0')}`;
+  document.getElementById('coverage-label').textContent = gaps
+    ? `${list.filter(t => t.status !== 'Deferred').length} tasks · ${gaps} gap${gaps === 1 ? '' : 's'}`
+    : `${list.filter(t => t.status !== 'Deferred').length} tasks`;
+  document.getElementById('plan-footer').textContent = '';
 }
 
 function renderAlert() {
@@ -373,22 +367,18 @@ function renderAlert() {
   const box = document.getElementById('alert-banner');
   box.classList.toggle('resolved', !needs.length && !gaps.length);
   document.getElementById('alert-title').textContent = gaps.length
-    ? 'The mission plan needs new coverage.'
+    ? 'Coverage gap'
     : needs.length
-      ? `${needs.length === 1 ? 'One crew member needs' : needs.length + ' crew members need'} a closer look.`
-      : 'Crew changes are accounted for.';
-  document.getElementById('alert-description').textContent = gaps.length
-    ? 'A stand-down, medical flag, or missing qualification affects an assigned task.'
-    : needs.length
-      ? `${needs.map(c => c.name).join(', ')} ${needs.length === 1 ? 'has' : 'have'} a check-in awaiting review before the next operation.`
+      ? `${needs.map(c => c.name).join(', ')} needs review`
       : flagged.length
-        ? `${flagged.map(c => c.name).join(', ')} ${flagged.length === 1 ? 'carries' : 'carry'} medical flags that can block assignment.`
-        : 'Review the current plan and share the onboard decision with Earth.';
+        ? `${flagged.map(c => c.name).join(', ')} flagged`
+        : 'All clear';
+  document.getElementById('alert-description').textContent = '';
   document.getElementById('review-checkin').innerHTML = gaps.length
-    ? 'Review coverage ↗'
+    ? 'Coverage ↗'
     : needs.length
-      ? 'Review check-in ↗'
-      : 'View Earth packet ↗';
+      ? 'Review ↗'
+      : 'Packet ↗';
   document.getElementById('attention-count').textContent = needs.length + flagged.filter(c => c.state !== 'review').length;
   document.getElementById('log-count').textContent = state.log.length;
 }
@@ -396,7 +386,7 @@ function renderAlert() {
 function renderLog() {
   document.getElementById('log-content').innerHTML = state.log.length
     ? state.log.map(l => `<article class="log-row"><time>${escapeText(l.time)}</time><div><h3>${escapeText(l.title)}</h3><p>${escapeText(l.detail)}</p></div></article>`).join('')
-    : '<div class="empty"><strong>Your decisions will appear here.</strong><p>Review a check-in, confirm a duty change, or approve a new plan to create the first entry.</p></div>';
+    : '<div class="empty"><strong>No decisions yet.</strong></div>';
 }
 
 function renderChrome() {
@@ -422,15 +412,14 @@ function setView(view) {
   currentView = view;
   document.querySelectorAll('.nav-item').forEach(b => b.classList.toggle('active', b.dataset.view === view));
   const labels = {
-    overview: ['Overview', 'Ready for what’s next.', 'A clear view of your crew. A plan that adapts with them.'],
-    health: ['Crew health', 'Every crew member matters.', 'Review personal trends, medical flags, and the latest check-ins.'],
-    plan: ['Mission plan', 'Keep the mission moving.', 'See who is assigned, what has changed, and where coverage is needed.'],
-    quals: ['Qualifications', 'Who is cleared for which job.', 'Edit crew skills and the cooling-loop requirements used for coverage.'],
-    log: ['Decision log', 'A record of every decision.', 'Health reviews, duty changes, and the reasoning behind the plan.']
+    overview: 'Overview',
+    health: 'Health',
+    plan: 'Plan',
+    quals: 'Qualifications',
+    log: 'Decision log'
   };
-  document.getElementById('breadcrumb-current').textContent = labels[view][0];
-  document.getElementById('page-heading').textContent = labels[view][1];
-  document.getElementById('page-description').textContent = labels[view][2];
+  document.getElementById('breadcrumb-current').textContent = labels[view];
+  document.getElementById('page-heading').textContent = labels[view];
   document.body.classList.toggle('plan-view', view === 'plan');
   document.body.classList.toggle('health-view', view === 'health');
   document.body.classList.toggle('overview-view', view === 'overview');
@@ -457,16 +446,15 @@ function closeDialog() {
 
 function openCheckin() {
   const c = byId(state.selected);
-  showDialog('A moment to check in.', 'CREW HEALTH / SELF-REPORT', `
-    <p>Record how you slept and how you feel before your next task.</p>
+  showDialog('Check-in', 'Self-report', `
     <form id="checkin-form">
-      <label class="field"><span>Crew member</span><select name="crew">${state.crew.map(p => `<option value="${p.id}" ${p.id === c.id ? 'selected' : ''}>${p.name} — ${p.role}</option>`).join('')}</select></label>
+      <label class="field"><span>Crew</span><select name="crew">${state.crew.map(p => `<option value="${p.id}" ${p.id === c.id ? 'selected' : ''}>${p.name}</option>`).join('')}</select></label>
       <div class="field-row">
-        <label class="field"><span>Last night’s sleep (hours)</span><input name="sleep" type="number" min="0" max="24" step="0.01" value="${c.sleep}" required></label>
-        <label class="field"><span>Fatigue <output id="fatigue-output">${c.fatigue}</output> / 10</span><input name="fatigue" type="range" min="0" max="10" value="${c.fatigue}"><small>0 · None &nbsp; 10 · Extreme</small></label>
+        <label class="field"><span>Sleep (h)</span><input name="sleep" type="number" min="0" max="24" step="0.01" value="${c.sleep}" required></label>
+        <label class="field"><span>Fatigue <output id="fatigue-output">${c.fatigue}</output>/10</span><input name="fatigue" type="range" min="0" max="10" value="${c.fatigue}"></label>
       </div>
-      <label class="field"><span>How are you feeling?</span><textarea name="note" maxlength="300" required>${escapeText(c.note)}</textarea></label>
-      <div class="dialog-actions"><button type="button" class="button btn btn--secondary secondary" data-close>Cancel</button><button class="button btn btn--primary primary" type="submit">Save check-in →</button></div>
+      <label class="field"><span>Note</span><textarea name="note" maxlength="300" required>${escapeText(c.note)}</textarea></label>
+      <div class="dialog-actions"><button type="button" class="button btn btn--secondary secondary" data-close>Cancel</button><button class="button btn btn--primary primary" type="submit">Save →</button></div>
     </form>`);
   const form = document.getElementById('checkin-form');
   form.elements.fatigue.addEventListener('input', () => {
@@ -489,67 +477,63 @@ function openCheckin() {
     person.history[6] = person.sleep;
     if (person.state !== 'down') person.state = 'review';
     state.selected = person.id;
-    addLog(`${person.name} submitted a check-in`, `${person.sleep} h sleep; fatigue ${person.fatigue}/10. ${person.state === 'down' ? 'Stand-down remains in effect pending review.' : 'Queued for duty review.'}`);
+    addLog(`${person.name} check-in`, `${person.sleep} h · fatigue ${person.fatigue}/10`);
     closeDialog();
     render();
-    toast('Check-in saved. Ready for medical officer review.');
+    toast('Check-in saved.');
   });
 }
 
 function openFlags() {
   const c = byId(state.selected);
-  showDialog('Medical flags', 'CREW MEDICAL OFFICER / ' + c.initials, `
-    <p>Non-sleep constraints that can block assignment or EVA work for ${escapeText(c.name)}.</p>
+  showDialog('Flags', c.initials, `
     <form id="flags-form">
       ${FLAG_OPTIONS.map(flag => `
         <label class="choice">
           <input type="checkbox" name="flag" value="${flag.id}" ${(c.flags || []).includes(flag.id) ? 'checked' : ''}>
           <strong>${escapeText(flag.label)}</strong>
-          <p>Blocks: ${flag.blocks.join(' · ')}</p>
         </label>
       `).join('')}
-      <div class="dialog-actions"><button type="button" class="button btn btn--secondary secondary" data-close>Cancel</button><button class="button btn btn--primary primary" type="submit">Save flags →</button></div>
+      <div class="dialog-actions"><button type="button" class="button btn btn--secondary secondary" data-close>Cancel</button><button class="button btn btn--primary primary" type="submit">Save →</button></div>
     </form>`);
   document.getElementById('flags-form').onsubmit = event => {
     event.preventDefault();
     const selected = [...event.target.querySelectorAll('input[name="flag"]:checked')].map(el => el.value);
     c.flags = selected;
-    addLog(`${c.name} medical flags updated`, selected.length ? selected.map(id => flagMeta(id).label).join('; ') : 'All medical flags cleared.');
+    addLog(`${c.name} flags`, selected.length ? selected.map(id => flagMeta(id).label).join('; ') : 'Cleared');
     closeDialog();
     render();
-    toast('Medical flags saved.');
+    toast('Flags saved.');
   };
 }
 
 function openDuty() {
   const c = byId(state.selected);
-  const measured = c.subject ? `<p class="health-footnote">Sleep chart uses measured BIDSleep subject ${escapeText(c.subject)}. The stand-down decision stays with the medical officer.</p>` : '';
+  const measured = '';
   const flags = crewFlags(c);
-  showDialog('Review duty status', 'CREW MEDICAL OFFICER / ' + c.initials, `
-    <p>Review ${c.name}’s report and confirm the appropriate duty status.</p>
+  showDialog('Duty status', c.initials, `
     <div class="review-summary">
-      <div><span>Last night</span><b>${c.sleep} h</b></div>
-      <div><span>Usual sleep</span><b>${c.baseline} h</b></div>
+      <div><span>Sleep</span><b>${c.sleep} h</b></div>
+      <div><span>Usual</span><b>${c.baseline} h</b></div>
       <div><span>Fatigue</span><b>${c.fatigue}/10</b></div>
     </div>
     <blockquote class="quote">“${escapeText(c.note)}”</blockquote>
-    ${flags.length ? `<p class="health-footnote">Active flags: ${flags.map(f => f.label).join('; ')}.</p>` : ''}
+    ${flags.length ? `<p class="health-footnote">${flags.map(f => f.label).join('; ')}</p>` : ''}
     ${measured}
-    <p>Standing down removes ${c.name} from available coverage. Existing assignments will be flagged for replanning.</p>
     <div class="dialog-actions">
-      <button class="button btn btn--secondary secondary" id="confirm-available">Confirm available</button>
-      <button class="button btn danger" id="confirm-down" ${c.state === 'down' ? 'disabled' : ''}>Confirm stand-down →</button>
+      <button class="button btn btn--secondary secondary" id="confirm-available">Available</button>
+      <button class="button btn danger" id="confirm-down" ${c.state === 'down' ? 'disabled' : ''}>Stand down →</button>
     </div>`);
   document.getElementById('confirm-available').onclick = () => {
     c.state = 'available';
-    addLog(`${c.name} confirmed available`, 'Duty status reviewed by A. Okonkwo. Existing plan retained pending any reassignment.');
+    addLog(`${c.name} available`, 'Confirmed by medical officer.');
     closeDialog();
     render();
-    toast(`${c.name} is available for assignment.`);
+    toast(`${c.name} available.`);
   };
   document.getElementById('confirm-down').onclick = () => {
     c.state = 'down';
-    addLog(`${c.name} stood down`, 'A. Okonkwo confirmed stand-down after reviewing the crew check-in and measured sleep trend.');
+    addLog(`${c.name} stood down`, 'Confirmed by medical officer.');
     render();
     openCoverage();
   };
@@ -574,16 +558,15 @@ function openCoverage() {
   const eligible = state.crew.filter(c => !candidateReason(c));
   const options = state.crew.filter(c => c.id !== 'ibarra');
   const selected = eligible.find(c => c.id === state.assigned) || eligible[0];
-  showDialog('Find the next workable plan.', 'MISSION PLAN / COOLING LOOP INSPECTION', `
-    <p>09:30–11:00 UTC · Requires ${state.requirements.coolingLoop.specialistSkills.join(' + ')} and ${commanderSkill}. Edit these under Qualifications.</p>
-    ${commanderDown ? `<div class="plan-notice">Commander coverage is blocked (${commander.state === 'down' ? 'stand-down' : flagBlocks(commander, 'assignment')?.label || flagBlocks(commander, 'eva')?.label || `missing ${commanderSkill}`}). The inspection must be deferred until qualified coverage is available.</div>` : ''}
+  showDialog('Coverage', '09:30 cooling loop', `
+    ${commanderDown ? `<div class="plan-notice">Commander blocked — defer inspection.</div>` : ''}
     <form id="coverage-form">
       ${options.map(c => {
-        const reason = commanderDown ? 'EVA commander unavailable' : candidateReason(c);
-        return `<label class="choice"><input type="radio" name="replacement" value="${c.id}" ${reason ? 'disabled' : c.id === selected?.id ? 'checked' : ''}><strong>${c.name} · ${c.role}</strong><p>${c.skills.join(' · ') || 'No skills listed'}</p>${reason ? `<em>${reason}</em>` : c.id === 'alvarez' ? '<em>Moves plant growth experiment from 10:00 to 13:00 to avoid overlap.</em>' : '<p>Available for the full inspection window.</p>'}</label>`;
+        const reason = commanderDown ? 'Commander unavailable' : candidateReason(c);
+        return `<label class="choice"><input type="radio" name="replacement" value="${c.id}" ${reason ? 'disabled' : c.id === selected?.id ? 'checked' : ''}><strong>${c.name}</strong><p>${c.role}</p>${reason ? `<em>${reason}</em>` : ''}</label>`;
       }).join('')}
-      <label class="choice"><input type="radio" name="replacement" value="defer" ${commanderDown || !eligible.length ? 'checked' : ''}><strong>Defer the inspection</strong><p>Hold the task for crew review. Record the coverage gap in the Earth packet.</p></label>
-      <div class="dialog-actions"><button type="button" class="button btn btn--secondary secondary" data-close>Cancel</button><button type="submit" class="button btn btn--primary primary">Confirm plan →</button></div>
+      <label class="choice"><input type="radio" name="replacement" value="defer" ${commanderDown || !eligible.length ? 'checked' : ''}><strong>Defer</strong></label>
+      <div class="dialog-actions"><button type="button" class="button btn btn--secondary secondary" data-close>Cancel</button><button type="submit" class="button btn btn--primary primary">Confirm →</button></div>
     </form>`);
   document.getElementById('coverage-form').onsubmit = event => {
     event.preventDefault();
@@ -593,14 +576,13 @@ function openCoverage() {
     if (choice !== 'defer') state.assigned = choice;
     state.version++;
     const description = choice === 'defer'
-      ? 'Cooling loop inspection deferred. Crew review required before rescheduling.'
-      : `${byId(choice).name} assigned with S. Ibarra.${choice === 'alvarez' ? ' Plant growth experiment moved to 13:00 to avoid overlap.' : ''}`;
-    addLog(`Mission plan v${state.version} confirmed`, description);
+      ? 'Inspection deferred.'
+      : `${byId(choice).name} + S. Ibarra assigned.${choice === 'alvarez' ? ' Plant growth → 13:00.' : ''}`;
+    addLog(`Plan v${state.version}`, description);
     render();
-    showDialog('Plan updated.', 'CONFIRMED BY A. OKONKWO', `
+    showDialog('Plan updated', 'Confirmed', `
       <p>${escapeText(description)}</p>
-      <div class="plan-notice">${state.crew.filter(c => c.state === 'down').map(c => c.name).join(', ') || 'No crew'} ${state.crew.some(c => c.state === 'down') ? 'currently stood down. Review return to duty when appropriate.' : 'currently stood down.'}</div>
-      <div class="dialog-actions"><button class="button btn btn--secondary secondary" data-close>Back to overview</button><button class="button btn btn--primary primary" id="show-packet">Review Earth packet →</button></div>`);
+      <div class="dialog-actions"><button class="button btn btn--secondary secondary" data-close>Close</button><button class="button btn btn--primary primary" id="show-packet">Earth packet →</button></div>`);
     document.getElementById('show-packet').onclick = openPacket;
   };
 }
@@ -610,26 +592,20 @@ function packetText() {
     ? `Sleep source: ${sleepCatalog.dataset.name} ${sleepCatalog.dataset.version}`
     : 'Sleep source: sample values';
   return [
-    'CREW SWAP / ARES / SOL 187',
-    `MISSION PLAN VERSION ${state.version}`,
-    `Operator view: ${ROLES[state.operatorRole].label}`,
+    'CREW SWAP · ARES · SOL 187',
+    `Plan v${state.version} · ${ROLES[state.operatorRole].short}`,
     dataLine,
-    'Crew identities and schedule are simulated.',
     '',
-    `Duty review: ${state.crew.map(c => {
+    ...state.crew.map(c => {
       const flags = crewFlags(c).map(f => f.label).join(', ');
-      return `${c.name}: ${statusLabel(c)} (${c.sleep} h sleep${flags ? `; flags: ${flags}` : ''})`;
-    }).join('; ')}`,
+      return `${c.name}: ${statusLabel(c)} · ${c.sleep} h${flags ? ` · ${flags}` : ''}`;
+    }),
     '',
-    `Cooling loop requires: ${state.requirements.coolingLoop.specialistSkills.join(', ')} + ${state.requirements.coolingLoop.commanderSkill}`,
+    `Cooling loop: ${state.requirements.coolingLoop.specialistSkills.join(', ')} + ${state.requirements.coolingLoop.commanderSkill}`,
     '',
-    ...tasks().map(t => `${t.time} UTC | ${t.title} | ${t.status}\nCrew: ${t.crew.map(id => byId(id).name).join(', ') || 'Unassigned'}`),
+    ...tasks().map(t => `${t.time} | ${t.title} | ${t.status} | ${t.crew.map(id => byId(id).name).join(', ') || '—'}`),
     '',
-    'Latest decision:',
-    state.log[0]?.detail || 'No changes confirmed.',
-    '',
-    'Prepared onboard. One-way light time: 20 minutes (scenario assumption).',
-    'Transmission pending.'
+    state.log[0]?.detail || 'No changes.'
   ].join('\n');
 }
 
@@ -644,27 +620,25 @@ function download(name, content, type = 'text/plain') {
 }
 
 function openPacket() {
-  showDialog('Earth handoff', 'ONBOARD DECISION / READY TO REVIEW', `
-    <p>The packet reflects current duty status, medical flags, and the latest mission plan.</p>
+  showDialog('Earth packet', 'Sol 187', `
     <pre class="packet">${escapeText(packetText())}</pre>
-    <div class="dialog-actions"><button class="button btn btn--secondary secondary" data-close>Close</button><button class="button btn btn--primary primary" id="download-packet">Download packet ↓</button></div>`);
+    <div class="dialog-actions"><button class="button btn btn--secondary secondary" data-close>Close</button><button class="button btn btn--primary primary" id="download-packet">Download ↓</button></div>`);
   document.getElementById('download-packet').onclick = () => {
     download('crew-swap-earth-packet.txt', packetText());
-    toast('Earth packet downloaded.');
+    toast('Packet downloaded.');
   };
 }
 
 function openSources() {
   const dataset = sleepCatalog?.dataset;
   const sleepBlock = dataset
-    ? `<div class="source-item"><a href="${escapeText(dataset.url)}" target="_blank" rel="noopener">${escapeText(dataset.name)} ${escapeText(dataset.version)} ↗</a><p>${escapeText(dataset.notes)}</p><p>DOI: <a href="${escapeText(dataset.doi)}" target="_blank" rel="noopener">${escapeText(dataset.doi)}</a></p></div>`
-    : `<div class="source-item"><strong>Sleep data</strong><p>Measured sleep records were unavailable. The interface is using sample sleep histories.</p></div>`;
-  showDialog('Data & references', 'PROTOTYPE / PROVENANCE', `
-    <p>Crew names, roles, qualifications, and the Mars schedule are simulated. Sleep totals are measured overnight recordings mapped into the demo.</p>
+    ? `<div class="source-item"><a href="${escapeText(dataset.url)}" target="_blank" rel="noopener">${escapeText(dataset.name)} ${escapeText(dataset.version)} ↗</a><p>DOI: <a href="${escapeText(dataset.doi)}" target="_blank" rel="noopener">${escapeText(dataset.doi)}</a></p></div>`
+    : `<div class="source-item"><strong>Sleep data</strong><p>Using sample histories.</p></div>`;
+  showDialog('Sources', 'References', `
     ${sleepBlock}
-    <div class="source-item"><a href="https://www.nasa.gov/news-release/nasa-coverage-of-rescheduled-spacewalk-preparing-for-new-solar-array/" target="_blank" rel="noopener">NASA · A real crew reassignment ↗</a><p>In 2021, Thomas Pesquet replaced Mark Vande Hei on a rescheduled spacewalk while Vande Hei provided internal support.</p></div>
-    <div class="source-item"><a href="https://ntrs.nasa.gov/archive/nasa/casi.ntrs.nasa.gov/20140016946.pdf" target="_blank" rel="noopener">NASA · Fatigue in ISS astronauts ↗</a><p>Background on fatigue, sleep monitoring, and performance measures. Duty decisions in this preview are made by the operator.</p></div>
-    <div class="dialog-actions"><button class="button btn btn--primary primary" data-close>Got it</button></div>`);
+    <div class="source-item"><a href="https://www.nasa.gov/news-release/nasa-coverage-of-rescheduled-spacewalk-preparing-for-new-solar-array/" target="_blank" rel="noopener">NASA spacewalk reassignment ↗</a></div>
+    <div class="source-item"><a href="https://ntrs.nasa.gov/archive/nasa/casi.ntrs.nasa.gov/20140016946.pdf" target="_blank" rel="noopener">NASA fatigue study ↗</a></div>
+    <div class="dialog-actions"><button class="button btn btn--primary primary" data-close>Close</button></div>`);
 }
 
 function switchRole(roleId) {
@@ -674,7 +648,7 @@ function switchRole(roleId) {
   addLog(`Operator switched to ${role.label}`, role.heading);
   render();
   setView(role.defaultView);
-  toast(`${role.short} view · opens on ${role.defaultView === 'plan' ? 'Mission plan' : 'Crew health'}.`);
+  toast(`${role.short}`);
 }
 
 function bindEvents() {
@@ -714,12 +688,11 @@ function bindEvents() {
   document.getElementById('open-plan').onclick = () => setView('plan');
   document.getElementById('sources-button').onclick = openSources;
   document.getElementById('mobile-tools').onclick = () => {
-    showDialog('Preview options', 'CREW SWAP', `
-      <p>${sleepCatalog ? 'Sleep totals come from PhysioNet BIDSleep. Mission roles remain simulated.' : 'The interface currently uses sample crew health and mission data.'}</p>
-      <label class="field"><span>Operator role</span>
+    showDialog('Options', 'Crew Swap', `
+      <label class="field"><span>Role</span>
         <select id="mobile-role">${Object.values(ROLES).map(r => `<option value="${r.id}" ${state.operatorRole === r.id ? 'selected' : ''}>${r.short} — ${r.label}</option>`).join('')}</select>
       </label>
-      <div class="dialog-actions"><button class="button btn btn--secondary secondary" id="mobile-reset">Reset preview</button><button class="button btn btn--primary primary" id="mobile-sources">Data & references</button></div>`);
+      <div class="dialog-actions"><button class="button btn btn--secondary secondary" id="mobile-reset">Reset</button><button class="button btn btn--primary primary" id="mobile-sources">Sources</button></div>`);
     document.getElementById('mobile-role').onchange = event => {
       switchRole(event.target.value);
       closeDialog();
@@ -732,9 +705,9 @@ function bindEvents() {
     toast('Decision log downloaded.');
   };
   document.getElementById('reset-button').onclick = () => {
-    showDialog('Restart the preview?', 'SAMPLE MISSION', `
-      <p>This restores the four crew records from the loaded sleep dataset and clears locally saved decisions, flags, and qualification edits.</p>
-      <div class="dialog-actions"><button class="button btn btn--secondary secondary" data-close>Keep current plan</button><button class="button btn danger" id="confirm-reset">Reset preview</button></div>`);
+    showDialog('Reset?', 'Preview', `
+      <p>Clear saved decisions and restore the starting crew state.</p>
+      <div class="dialog-actions"><button class="button btn btn--secondary secondary" data-close>Cancel</button><button class="button btn danger" id="confirm-reset">Reset</button></div>`);
     document.getElementById('confirm-reset').onclick = () => {
       const role = state.operatorRole;
       state = freshState(sleepCatalog);
