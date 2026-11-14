@@ -5,6 +5,7 @@
   <meta name="theme-color" content="#121512">
   <title>Crew Swap — Mission readiness</title>
   <meta name="description" content="Crew health, informed decisions, and a mission plan that adapts.">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=DM+Sans:wght@400;450;500;550;600;650;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
@@ -27,7 +28,7 @@
     <div class="content">
       <section class="page-title"><div><div class="eyebrow">CREW OPERATIONS / SOL 187</div><h1 id="page-heading">Ready for what’s next.</h1><p id="page-description">A clear view of your crew. A plan that adapts with them.</p></div><button class="button primary" id="new-checkin"><span>＋</span> New check-in</button></section>
       <div class="connection-strip"><span><i class="online-dot"></i> ONBOARD WORKSPACE</span><span>EARTH LINK <b>20 min one way</b> <i class="signal-bars">▂▄▆</i></span><span class="strip-end">Next operation <b id="next-operation">09:30 · Cooling loop inspection</b></span></div>
-      <section class="alert-banner" id="alert-banner"><span class="alert-icon">!</span><div><strong id="alert-title">One crew member needs a closer look.</strong><p id="alert-description">Chen reported high fatigue before the 09:30 inspection. Review their check-in.</p></div><button class="button alert-button" id="review-checkin">Review check-in <span>↗</span></button></section>
+      <section class="alert-banner" id="alert-banner"><span class="alert-icon">!</span><div><strong id="alert-title">One crew member needs a closer look.</strong><p id="alert-description">L. Chen has a check-in awaiting review before the next operation.</p></div><button class="button alert-button" id="review-checkin">Review check-in <span>↗</span></button></section>
       <section id="crew-section"><div class="section-heading"><h2>Crew readiness <span>04</span></h2><span class="legend"><i class="dot green"></i> Available <i class="dot amber"></i> Review <i class="dot gray"></i> Stand-down</span></div><div id="crew-grid" class="crew-grid"></div></section>
       <div class="workspace" id="workspace">
         <section class="panel schedule-panel"><div class="panel-header"><div><span class="eyebrow">TODAY’S OPERATIONS</span><h2>Mission plan</h2></div><div class="schedule-tools"><span class="version-pill" id="version-label">VERSION 01</span><button class="icon-button" id="open-plan" aria-label="Expand mission plan">↗</button></div></div><div class="schedule-summary"><span><i class="dot green"></i> <b id="coverage-label">4 scheduled tasks</b></span><span>All times UTC</span></div><div id="schedule" class="schedule"></div><div class="schedule-footer"><span id="plan-footer">Review crew health before the next operation.</span><button class="text-link" id="review-options">Review coverage →</button></div></section>

@@ -30,10 +30,12 @@ npm start
 
 Open [http://127.0.0.1:43730](http://127.0.0.1:43730).
 
-Or open `dist/index.html` from the Desktop folder after starting the server (fetching `data/sleep.json` needs HTTP).
+On Desktop, double-click **Open Crew Swap** (`.sh` on Mac/Linux, `.cmd` on Windows) or run `npm start` from this folder.
+
+Fetching `data/sleep.json` needs HTTP — open the app through the local server, not as a raw `file://` page.
 
 ## Project layout
 
-- `dist/` — static UI and `data/sleep.json`
-- `server.cjs` — tiny static server
-- `tools/import_sleep.py` — builds sleep totals from BIDSleep `labels.mat` files
+- `dist/` — static UI, `favicon.svg`, and `data/sleep.json`
+- `server.cjs` — tiny static server on port 43730
+- `tools/import_sleep.py` — rebuilds sleep totals from BIDSleep `labels.mat` files under `/tmp/bidsleep`
