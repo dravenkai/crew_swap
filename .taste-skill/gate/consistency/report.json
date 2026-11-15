@@ -1,13 +1,13 @@
 {
  "page": "C:\\Users\\Lenovo\\Desktop\\Crew Swap\\dist\\index.html",
  "url": "http://127.0.0.1:5200/index.html",
- "at": "2026-11-15T02:54:28.705Z",
+ "at": "2026-11-15T03:08:55.703Z",
  "out": "C:\\Users\\Lenovo\\Desktop\\Crew Swap\\.taste-skill\\gate\\consistency",
  "widths": [
   {
    "width": 1440,
    "height": 900,
-   "screens": 1,
+   "screens": 2,
    "held": 0,
    "errors": [],
    "findings": [
@@ -51,54 +51,14 @@
      "fix": "make the nav one bar from the content's left edge to its right edge, with every link and action inside it"
     },
     {
-     "check": "button-styles",
-     "sev": "FAIL",
-     "sel": "(one screen)",
-     "text": "",
-     "stop": 0,
-     "msg": "3 button styles on one screen: soft, fill #e5f1f2 (\"Overview\"); soft, fill #0d7480 (\"Add check-in\"); soft, fill #ffffff, outline #d4b481 (\"Review check-in\"); the odd one out: \"Review check-in\"",
-     "crop": "1440-04-button-styles.jpg",
-     "fix": "one primary and one secondary button: one shape, one height per size, one label size"
-    },
-    {
      "check": "cta",
      "sev": "FAIL",
      "sel": "div#overview-content > section.panel.next-panel",
      "text": "Next operation",
      "msg": "the last section before the footer ends with no button",
      "stop": 0,
-     "crop": "1440-05-cta.jpg",
+     "crop": "1440-04-cta.jpg",
      "fix": "add the action: a button in the hero, one on every priced item, one in the closing section"
-    },
-    {
-     "check": "copy-headline",
-     "sev": "FAIL",
-     "sel": "h1#page-heading",
-     "text": "Overview",
-     "msg": "\"Overview\" does not name what is sold (crew health and mission planning, crew, health, mission, from flags); only the line under it does",
-     "stop": 0,
-     "crop": "1440-06-copy-headline.jpg",
-     "fix": "put the category noun in the h1 (and who it is for, or where), in 2 to 8 words"
-    },
-    {
-     "check": "heading-scale",
-     "sev": "FAIL",
-     "sel": "div#next-operation > h3",
-     "text": "Cooling loop inspection",
-     "msg": "an h3 at 23px, as large as the smallest h2 (19px) or larger",
-     "stop": 0,
-     "crop": "1440-07-heading-scale.jpg",
-     "fix": "size headings by level: the h1 largest, one size per level, each level below the one above"
-    },
-    {
-     "check": "links",
-     "sev": "FAIL",
-     "sel": "aside.sidebar > a.brand",
-     "text": "Crew Swap",
-     "msg": "\"Crew Swap\" goes to #overview, which is not on this page",
-     "stop": 0,
-     "crop": "1440-08-links.jpg",
-     "fix": "point every link at a real section, page or file"
     },
     {
      "check": "flush",
@@ -107,7 +67,7 @@
      "text": "Check-in awaiting review",
      "msg": "its first line sits 25px under the top edge of section#alert-banner, where the ground changes",
      "stop": 0,
-     "crop": "1440-09-flush.jpg",
+     "crop": "1440-05-flush.jpg",
      "fix": "give the section its padding at the edge where the ground changes (the closing call keeps a clear gap above the footer)"
     },
     {
@@ -117,7 +77,7 @@
      "text": "Thiri Htet needs a duty review before the next o",
      "msg": "its last line sits 27px above the lower edge of section#alert-banner, where the ground changes to section.panel:nth-of-type(1)",
      "stop": 0,
-     "crop": "1440-10-flush.jpg",
+     "crop": "1440-06-flush.jpg",
      "fix": "give the section its padding at the edge where the ground changes (the closing call keeps a clear gap above the footer)"
     },
     {
@@ -127,37 +87,17 @@
      "text": "View mission plan →",
      "msg": "its button sits 24px above the lower edge of section.panel.next-panel, where the ground changes to the footer",
      "stop": 0,
-     "crop": "1440-11-flush.jpg",
+     "crop": "1440-07-flush.jpg",
      "fix": "give the section its padding at the edge where the ground changes (the closing call keeps a clear gap above the footer)"
-    },
-    {
-     "check": "button-styles",
-     "sev": "WARN",
-     "sel": "(the page)",
-     "text": "",
-     "stop": 0,
-     "msg": "3 button styles on the page: soft, fill #e5f1f2 x1 (\"Overview\"); soft, fill #0d7480 x1 (\"Add check-in\"); soft, fill #ffffff, outline #d4b481 x1 (\"Review check-in\") (inside a held section or scroll scene, whose motion --quick does not check)",
-     "crop": "1440-12-button-styles.jpg",
-     "fix": "one primary and one secondary button: one shape, one height per size, one label size"
-    },
-    {
-     "check": "copy-headline",
-     "sev": "WARN",
-     "sel": "h1#page-heading",
-     "text": "Overview",
-     "msg": "the h1 has 1 word (2 to 8 read at a glance)",
-     "stop": 0,
-     "crop": "1440-13-copy-headline.jpg",
-     "fix": "put the category noun in the h1 (and who it is for, or where), in 2 to 8 words"
     },
     {
      "check": "copy-buttons",
      "sev": "WARN",
-     "sel": "aside.sidebar > nav > button.nav-item.active",
-     "text": "Overview",
-     "msg": "\"Overview\" does not start with a verb (book, buy, try, start, get, see...) (and 1 more like it: \"Review check-in\")",
+     "sel": "button#review-checkin",
+     "text": "Review check-in",
+     "msg": "\"Review check-in\" does not start with a verb (book, buy, try, start, get, see...)",
      "stop": 0,
-     "crop": "1440-14-copy-buttons.jpg",
+     "crop": "1440-08-copy-buttons.jpg",
      "fix": "label buttons with a verb and what the visitor gets (\"Book a room\", \"Start free trial\")"
     },
     {
@@ -172,21 +112,11 @@
     {
      "check": "heading-scale",
      "sev": "WARN",
-     "sel": "div#overview-content > section.panel:nth-of-type(1) > div.panel-header > h2",
-     "text": "Crew status",
-     "msg": "h2 headings in 2 sizes, 19px (\"Check-in awaiting review\") to 22px (x1.16)",
-     "stop": 0,
-     "crop": "1440-15-heading-scale.jpg",
-     "fix": "size headings by level: the h1 largest, one size per level, each level below the one above"
-    },
-    {
-     "check": "heading-scale",
-     "sev": "WARN",
      "sel": "div#next-operation > div.operation-time",
      "text": "09:30 UTC · 90 min",
-     "msg": "1 line of plain text set larger than the section headings (42px against h2 22px)",
+     "msg": "1 line of plain text set larger than the section headings (36px against h2 22px)",
      "stop": 0,
-     "crop": "1440-16-heading-scale.jpg",
+     "crop": "1440-09-heading-scale.jpg",
      "fix": "size headings by level: the h1 largest, one size per level, each level below the one above"
     },
     {
@@ -196,7 +126,7 @@
      "text": "Next operation",
      "msg": "the section's heading starts at 928px, 648px off the page margin (280px), and no other section starts there",
      "stop": 0,
-     "crop": "1440-17-off-grid.jpg",
+     "crop": "1440-10-off-grid.jpg",
      "fix": "move it onto the page margin, or the column edge its section uses"
     },
     {
@@ -206,7 +136,7 @@
      "text": "",
      "stop": 0,
      "msg": "92px between these sections, +44% against the median 64px of gaps at a change of ground",
-     "crop": "1440-18-section-gaps.jpg",
+     "crop": "1440-11-section-gaps.jpg",
      "fix": "use one gap between sections (all within 25% of each other)"
     },
     {
@@ -216,48 +146,18 @@
      "text": "",
      "stop": 0,
      "msg": "the sections overlap by 401px",
-     "crop": "1440-19-section-gaps.jpg",
+     "crop": "1440-12-section-gaps.jpg",
      "fix": "use one gap between sections (all within 25% of each other)"
-    },
-    {
-     "check": "label-centre",
-     "sev": "WARN",
-     "sel": "aside.sidebar > nav > button.nav-item.active",
-     "text": "Overview",
-     "msg": "its label sits 81px off-centre (16px of room at the left, 97px at the right) (inside a held section or scroll scene, whose motion --quick does not check)",
-     "stop": 0,
-     "crop": "1440-20-label-centre.jpg",
-     "fix": "centre the label in its button, or fill the empty side with an icon"
-    },
-    {
-     "check": "fake-button",
-     "sev": "WARN",
-     "sel": "div#next-operation > span.task-badge.review",
-     "text": "Health review",
-     "stop": 0,
-     "msg": "\"Health review\" looks like a button (soft, fill #fcf3e4, the same look as the page's buttons) but is not a link or a button",
-     "crop": "1440-21-fake-button.jpg",
-     "fix": "make it a real link or button, or drop its button look"
     },
     {
      "check": "stranded-action",
      "sev": "WARN",
      "sel": "button#new-checkin",
      "text": "Add check-in",
-     "msg": "stands 695px across from the nearest text of its block (\"Overview\") (and 1 more like it: \"Review check-in\")",
+     "msg": "stands 656px across from the nearest text of its block (\"Mission overview\") (and 1 more like it: \"Review check-in\")",
      "stop": 0,
-     "crop": "1440-22-stranded-action.jpg",
+     "crop": "1440-13-stranded-action.jpg",
      "fix": "put the button under or beside the text it belongs to"
-    },
-    {
-     "check": "button-contrast",
-     "sev": "WARN",
-     "sel": "aside.sidebar > nav > button.nav-item.active",
-     "text": "Overview",
-     "stop": 0,
-     "msg": "the button \"Overview\" (#e5f1f2) stands only 1.15:1 off the ground around it: it reads as part of the ground, or as switched off (inside a held section or scroll scene, whose motion --quick does not check)",
-     "crop": "1440-23-button-contrast.jpg",
-     "fix": "give the button a fill that stands at least 1.5:1 off what is around it, or an outline in the ink"
     },
     {
      "check": "one-screen",
@@ -267,34 +167,7 @@
      "msg": "1 section is shorter than the screen, so the next one's heading or picture shows with it: \"Crew status\" is 446px of the 900px under the nav, and \"Next operation\" shows below it",
      "fix": "give each section the screen (min-height: 100svh less the nav, its content centred), or join two short ones into one",
      "stop": 0,
-     "crop": "1440-24-one-screen.jpg"
-    },
-    {
-     "check": "font-load",
-     "sev": "WARN",
-     "sel": ":root",
-     "text": "Funnel Display",
-     "msg": "\"Funnel Display\" is asked for by --font-display but never loaded (no font link or @font-face loads it): it shows in its fallback",
-     "stop": null,
-     "fix": "load every family the type asks for: name it in the font link as start.mjs prints it, spelt as Google Fonts spells it, or ask for a family the page loads"
-    },
-    {
-     "check": "font-load",
-     "sev": "WARN",
-     "sel": ":root",
-     "text": "Funnel Sans",
-     "msg": "\"Funnel Sans\" is asked for by --font-text but never loaded (no font link or @font-face loads it): it shows in its fallback",
-     "stop": null,
-     "fix": "load every family the type asks for: name it in the font link as start.mjs prints it, spelt as Google Fonts spells it, or ask for a family the page loads"
-    },
-    {
-     "check": "font-load",
-     "sev": "WARN",
-     "sel": ":root",
-     "text": "DM Mono",
-     "msg": "\"DM Mono\" is asked for by --font-mono but never loaded (no font link or @font-face loads it): it shows in its fallback",
-     "stop": null,
-     "fix": "load every family the type asks for: name it in the font link as start.mjs prints it, spelt as Google Fonts spells it, or ask for a family the page loads"
+     "crop": "1440-14-one-screen.jpg"
     },
     {
      "check": "moment-none",
@@ -328,7 +201,7 @@
      "check": "hero-screen",
      "sev": "FAIL",
      "sel": "main#main > div.content",
-     "text": "OverviewCrew status and the next operati",
+     "text": "Mission overviewCrew status and the next",
      "msg": "836px of the next section shows on the first screen (from 64px on a 900px screen): nothing below the hero shows at load (SR-1)",
      "fix": "end the hero at the fold so nothing of the next section shows at load (hero height: 100svh)",
      "rule": "SR-1 T2"
@@ -337,8 +210,8 @@
      "check": "section-height",
      "sev": "FAIL",
      "sel": "main#main > div.content",
-     "text": "OverviewCrew status and the next operati",
-     "msg": "the section is 836px tall (0.9 screens), 64px short of one screen (900px): every section after the hero is one screen or two, 2px either way (SR-2)",
+     "text": "Mission overviewCrew status and the next",
+     "msg": "the section is 840px tall (0.9 screens), 60px short of one screen (900px): every section after the hero is one screen or two, 2px either way (SR-2)",
      "fix": "set the section to one screen or two (height: calc(var(--h,1) * 100vh), --h 1 or 2) and cut or split its content to fit",
      "rule": "SR-2 T-height",
      "crop": "1440-rhythm-02-section-height.jpg"
@@ -347,7 +220,7 @@
      "check": "section-height",
      "sev": "FAIL",
      "sel": "main#main > div.content",
-     "text": "OverviewCrew status and the next operati",
+     "text": "Mission overviewCrew status and the next",
      "msg": "the section starts at 64px, 64px below the screen grid (0 x 900px): sections start on whole screens (SR-2)",
      "fix": "make every section above it exactly one or two screens tall, so this one starts on a whole screen",
      "rule": "SR-2 T-grid"
@@ -356,8 +229,8 @@
      "check": "section-height",
      "sev": "FAIL",
      "sel": "main#main > div.content",
-     "text": "OverviewCrew status and the next operati",
-     "msg": "the section's content does not fit it: its lowest content ends 812px below its top, past 764px (the section less 72px of bottom padding) (SR-2)",
+     "text": "Mission overviewCrew status and the next",
+     "msg": "the section's content does not fit it: its lowest content ends 816px below its top, past 768px (the section less 72px of bottom padding) (SR-2)",
      "fix": "fit the content above the section's bottom padding (--padb), or make it two screens (.g2) in two groups",
      "rule": "SR-2 T-fit"
     },
@@ -376,6 +249,15 @@
      "sev": "FAIL",
      "sel": "main#main > header.topbar",
      "text": "Onboard workspaceResearch replay · Ficti",
+     "msg": "the screen at scroll 4px (the top of section 2) shows 60px of section 1 beside section 2: a screen shows one section (another may peek 8px, 24px WARN) (SR-4)",
+     "fix": "make each section exactly one screen or two, so a screen shows one section and no neighbour peeks",
+     "rule": "SR-4 T-views"
+    },
+    {
+     "check": "one-section",
+     "sev": "FAIL",
+     "sel": "main#main > header.topbar",
+     "text": "Onboard workspaceResearch replay · Ficti",
      "msg": "a <header> sits directly in <main>: every part of <main> is a <section> (SR-4)",
      "fix": "put every block of <main> in a <section>, and give a band its own section instead of a ground inside one",
      "rule": "SR-4 T-dom"
@@ -384,7 +266,7 @@
      "check": "one-section",
      "sev": "FAIL",
      "sel": "main#main > div.content",
-     "text": "OverviewCrew status and the next operati",
+     "text": "Mission overviewCrew status and the next",
      "msg": "a <div> sits directly in <main>: every part of <main> is a <section> (SR-4)",
      "fix": "put every block of <main> in a <section>, and give a band its own section instead of a ground inside one",
      "rule": "SR-4 T-dom"
@@ -422,7 +304,7 @@
      "check": "container-edges",
      "sev": "FAIL",
      "sel": "main#main > div.content",
-     "text": "OverviewCrew status and the next operati",
+     "text": "Mission overviewCrew status and the next",
      "msg": "the content of section 2 runs 280px from the left and 48px from the right (read from its outermost blocks: no .wrap): 280 and 48px are not one margin; the margin is 64-120px at 1440px (one container, equal margins, 2px either way) (SR-6)",
      "fix": "use one container on every section and the nav (.wrap): one margin left and right, 64-120px on a desktop, 16-24px on a phone",
      "rule": "SR-6 T1-margins"
@@ -450,7 +332,7 @@
      "sev": "FAIL",
      "sel": "main#main > header.topbar",
      "text": "Onboard workspaceResearch replay · Ficti",
-     "msg": "the section needs exactly one in-flow child .wrap (it has 2 in-flow children, 0 .wrap) (and 1 more like it: \"OverviewCrew status and \") (SR-6)",
+     "msg": "the section needs exactly one in-flow child .wrap (it has 2 in-flow children, 0 .wrap) (and 1 more like it: \"Mission overviewCrew sta\") (SR-6)",
      "fix": "build the page as header.nav, a main of sections (each one in-flow .wrap plus background layers) and footer.closing",
      "rule": "SR-6 T1-structure"
     },
@@ -506,7 +388,7 @@
      "sev": "FAIL",
      "sel": "button#new-checkin",
      "text": "Add check-in",
-     "msg": "its button sits 0px above the lower edge of header.page-title, where the ground changes to section#alert-banner",
+     "msg": "its button sits 0px above the lower edge of header#overview, where the ground changes to section#alert-banner",
      "stop": 0,
      "crop": "390-02-flush.jpg",
      "fix": "give the section its padding at the edge where the ground changes (the closing call keeps a clear gap above the footer)"
@@ -528,7 +410,7 @@
      "text": "Crew status",
      "msg": "no picture, effect or mock in this section; a feature section needs a visual",
      "stop": 1,
-     "crop": "390-08-no-visual.jpg",
+     "crop": "390-05-no-visual.jpg",
      "fix": "give the section a visual: a UI fragment on a ground, real icons, or a photograph that fits"
     },
     {
@@ -538,28 +420,8 @@
      "text": "Next operation",
      "msg": "the closing section is only text: no picture, icon, mock or effect in it",
      "stop": 2,
-     "crop": "390-10-text-only.jpg",
+     "crop": "390-07-text-only.jpg",
      "fix": "give the section a visual: a photograph that fits, the real icons, or a UI fragment on a ground"
-    },
-    {
-     "check": "button-styles",
-     "sev": "FAIL",
-     "sel": "(one screen)",
-     "text": "",
-     "stop": 0,
-     "msg": "3 button styles on one screen: soft, fill #e5f1f2 (\"Overview\"); soft, fill #0d7480 (\"Add check-in\"); soft, fill #ffffff, outline #d4b481 (\"Review check-in\"); the odd one out: \"Review check-in\"",
-     "crop": "390-04-button-styles.jpg",
-     "fix": "one primary and one secondary button: one shape, one height per size, one label size"
-    },
-    {
-     "check": "button-styles",
-     "sev": "FAIL",
-     "sel": "(the page)",
-     "text": "",
-     "stop": 0,
-     "msg": "3 button styles on the page: soft, fill #e5f1f2 x1 (\"Overview\"); soft, fill #0d7480 x1 (\"Add check-in\"); soft, fill #ffffff, outline #d4b481 x1 (\"Review check-in\")",
-     "crop": "390-05-button-styles.jpg",
-     "fix": "one primary and one secondary button: one shape, one height per size, one label size"
     },
     {
      "check": "cta",
@@ -568,27 +430,17 @@
      "text": "Next operation",
      "msg": "the last section before the footer ends with no button",
      "stop": 2,
-     "crop": "390-11-cta.jpg",
+     "crop": "390-08-cta.jpg",
      "fix": "add the action: a button in the hero, one on every priced item, one in the closing section"
-    },
-    {
-     "check": "heading-scale",
-     "sev": "FAIL",
-     "sel": "div#next-operation > h3",
-     "text": "Cooling loop inspection",
-     "msg": "an h3 at 23px, as large as the smallest h2 (19px) or larger",
-     "stop": 2,
-     "crop": "390-12-heading-scale.jpg",
-     "fix": "size headings by level: the h1 largest, one size per level, each level below the one above"
     },
     {
      "check": "heading-scale",
      "sev": "WARN",
      "sel": "div#next-operation > div.operation-time",
      "text": "09:30 UTC · 90 min",
-     "msg": "1 line of plain text set larger than the section headings (42px against h2 21px)",
+     "msg": "1 line of plain text set larger than the section headings (36px against h2 21px)",
      "stop": 1,
-     "crop": "390-09-heading-scale.jpg",
+     "crop": "390-06-heading-scale.jpg",
      "fix": "size headings by level: the h1 largest, one size per level, each level below the one above"
     },
     {
@@ -598,28 +450,8 @@
      "text": "",
      "stop": 0,
      "msg": "79px between these sections, +27% against the median 62px of gaps at a change of ground",
-     "crop": "390-06-section-gaps.jpg",
+     "crop": "390-04-section-gaps.jpg",
      "fix": "use one gap between sections (all within 25% of each other)"
-    },
-    {
-     "check": "fake-button",
-     "sev": "WARN",
-     "sel": "div#next-operation > span.task-badge.review",
-     "text": "Health review",
-     "stop": 2,
-     "msg": "\"Health review\" looks like a button (soft, fill #fcf3e4, the same look as the page's buttons) but is not a link or a button",
-     "crop": "390-13-fake-button.jpg",
-     "fix": "make it a real link or button, or drop its button look"
-    },
-    {
-     "check": "button-contrast",
-     "sev": "WARN",
-     "sel": "aside.sidebar > nav > button.nav-item.active",
-     "text": "Overview",
-     "stop": 0,
-     "msg": "the button \"Overview\" (#e5f1f2) stands only 1.15:1 off the ground around it: it reads as part of the ground, or as switched off",
-     "crop": "390-07-button-contrast.jpg",
-     "fix": "give the button a fill that stands at least 1.5:1 off what is around it, or an outline in the ink"
     }
    ],
    "glAsked": 0
@@ -638,7 +470,7 @@
  ],
  "shaders": 0,
  "hidden": {
-  "screens": 2,
+  "screens": 3,
   "quick": true
  },
  "sweep": {
@@ -659,8 +491,8 @@
   "findings": []
  },
  "counts": {
-  "FAIL": 36,
-  "WARN": 26
+  "FAIL": 30,
+  "WARN": 15
  },
  "checks": {
   "assets": "PASS",
@@ -704,18 +536,18 @@
   "ui-fit": "PASS",
   "ui-centre": "PASS",
   "dark-ground": "PASS",
-  "button-styles": "FAIL",
+  "button-styles": "PASS",
   "button-shape": "PASS",
   "same-action": "PASS",
   "button-picture": "PASS",
   "cta": "FAIL",
   "pricing-tiers": "PASS",
-  "copy-headline": "FAIL",
+  "copy-headline": "PASS",
   "copy-fact": "PASS",
   "copy-headings": "PASS",
   "copy-buttons": "WARN",
   "copy-actions": "WARN",
-  "heading-scale": "FAIL",
+  "heading-scale": "WARN",
   "stagger": "PASS",
   "top-stagger": "PASS",
   "off-grid": "WARN",
@@ -730,7 +562,7 @@
   "section-gaps": "WARN",
   "proximity": "PASS",
   "hole": "PASS",
-  "links": "FAIL",
+  "links": "PASS",
   "forms": "not checked",
   "photo-upscale": "PASS",
   "photo-set": "PASS",
@@ -739,8 +571,8 @@
   "nav-labels": "PASS",
   "link-styles": "PASS",
   "heading-align": "PASS",
-  "label-centre": "WARN",
-  "fake-button": "WARN",
+  "label-centre": "PASS",
+  "fake-button": "PASS",
   "stranded-action": "WARN",
   "orphan": "PASS",
   "unit-break": "PASS",
@@ -752,7 +584,7 @@
   "nav-current": "PASS",
   "progress-bar": "PASS",
   "photo-repeat": "PASS",
-  "button-contrast": "WARN",
+  "button-contrast": "PASS",
   "photo-print": "PASS",
   "grounds": "PASS",
   "split-align": "PASS",
@@ -764,7 +596,7 @@
   "hover-move": "not checked",
   "product-shown": "PASS",
   "same-object": "PASS",
-  "font-load": "WARN",
+  "font-load": "PASS",
   "visual-caption": "PASS",
   "visual-empty": "PASS",
   "effect-kind": "PASS",

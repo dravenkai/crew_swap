@@ -1,6 +1,6 @@
 {
  "start": "2026-11-15T02:45:30.445Z",
- "round": 1,
+ "round": 2,
  "idle": 0,
  "errors": 0,
  "status": "fail",
@@ -11,6 +11,15 @@
    "status": "fail",
    "fails": 28,
    "round": 1,
+   "reused": false,
+   "stopHookActive": false
+  },
+  {
+   "at": "2026-11-15T03:10:07.438Z",
+   "mode": "manual",
+   "status": "fail",
+   "fails": 23,
+   "round": 2,
    "reused": false,
    "stopHookActive": false
   }
@@ -28,11 +37,11 @@
   "by": "gate.mjs --start"
  },
  "manual": true,
- "roundKey": "e80f0184deb474d6:da39a3ee",
+ "roundKey": "b1a8875bc144f841:da39a3ee",
  "roundFree": false,
  "idleFree": false,
  "blockKey": null,
- "fp": "e80f0184deb474d6",
+ "fp": "b1a8875bc144f841",
  "page": "dist/index.html",
  "found": {
   "fails": [
@@ -102,23 +111,6 @@
     ]
    },
    {
-    "check": "button-styles",
-    "where": "(one screen)",
-    "msg": "3 button styles on one screen: soft, fill #e5f1f2 (\"Overview\"); soft, fill #0d7480 (\"Add check-in\"); soft, fill #ffffff, outline #d4b481 (\"Review check-in\"); the odd one out: \"Review check-in\"",
-    "fix": "one primary and one secondary button: one shape, one height per size, one label size",
-    "widths": [
-     1440,
-     390
-    ],
-    "from": "consistency",
-    "ids": [
-     "button-styles"
-    ],
-    "wheres": [
-     "(one screen)"
-    ]
-   },
-   {
     "check": "cta",
     "where": "div#overview-content > section.panel.next-panel \"Next operation\"",
     "msg": "the last section before the footer ends with no button",
@@ -133,55 +125,6 @@
     ],
     "wheres": [
      "div#overview-content > section.panel.next-panel \"Next operation\""
-    ]
-   },
-   {
-    "check": "copy-headline",
-    "where": "h1#page-heading \"Overview\"",
-    "msg": "\"Overview\" does not name what is sold (crew health and mission planning, crew, health, mission, from flags); only the line under it does",
-    "fix": "put the category noun in the h1 (and who it is for, or where), in 2 to 8 words",
-    "widths": [
-     1440
-    ],
-    "from": "consistency",
-    "ids": [
-     "copy-headline"
-    ],
-    "wheres": [
-     "h1#page-heading \"Overview\""
-    ]
-   },
-   {
-    "check": "heading-scale",
-    "where": "div#next-operation > h3 \"Cooling loop inspection\"",
-    "msg": "an h3 at 23px, as large as the smallest h2 (19px) or larger",
-    "fix": "size headings by level: the h1 largest, one size per level, each level below the one above",
-    "widths": [
-     1440,
-     390
-    ],
-    "from": "consistency",
-    "ids": [
-     "heading-scale"
-    ],
-    "wheres": [
-     "div#next-operation > h3 \"Cooling loop inspection\""
-    ]
-   },
-   {
-    "check": "links",
-    "where": "aside.sidebar > a.brand \"Crew Swap\"",
-    "msg": "\"Crew Swap\" goes to #overview, which is not on this page",
-    "fix": "point every link at a real section, page or file",
-    "widths": [
-     1440
-    ],
-    "from": "consistency",
-    "ids": [
-     "links"
-    ],
-    "wheres": [
-     "aside.sidebar > a.brand \"Crew Swap\""
     ]
    },
    {
@@ -218,7 +161,7 @@
    },
    {
     "check": "hero-screen",
-    "where": "main#main > div.content \"OverviewCrew status and the next operati\"",
+    "where": "main#main > div.content \"Mission overviewCrew status and the next\"",
     "msg": "836px of the next section shows on the first screen (from 64px on a 900px screen): nothing below the hero shows at load (SR-1)",
     "fix": "end the hero at the fold so nothing of the next section shows at load (hero height: 100svh)",
     "widths": [
@@ -229,13 +172,13 @@
      "hero-screen"
     ],
     "wheres": [
-     "main#main > div.content \"OverviewCrew status and the next operati\""
+     "main#main > div.content \"Mission overviewCrew status and the next\""
     ]
    },
    {
     "check": "section-height",
-    "where": "main#main > div.content \"OverviewCrew status and the next operati\"",
-    "msg": "the section is 836px tall (0.9 screens), 64px short of one screen (900px): every section after the hero is one screen or two, 2px either way (SR-2)",
+    "where": "main#main > div.content \"Mission overviewCrew status and the next\"",
+    "msg": "the section is 840px tall (0.9 screens), 60px short of one screen (900px): every section after the hero is one screen or two, 2px either way (SR-2)",
     "fix": "set the section to one screen or two (height: calc(var(--h,1) * 100vh), --h 1 or 2) and cut or split its content to fit",
     "widths": [
      1440
@@ -245,7 +188,7 @@
      "section-height"
     ],
     "wheres": [
-     "main#main > div.content \"OverviewCrew status and the next operati\""
+     "main#main > div.content \"Mission overviewCrew status and the next\""
     ]
    },
    {
@@ -262,7 +205,7 @@
     ],
     "wheres": [
      "main#main > header.topbar \"Onboard workspaceResearch replay · Ficti\"",
-     "main#main > div.content \"OverviewCrew status and the next operati\""
+     "main#main > div.content \"Mission overviewCrew status and the next\""
     ]
    },
    {
@@ -315,7 +258,7 @@
    },
    {
     "check": "container-edges",
-    "where": "main#main > div.content \"OverviewCrew status and the next operati\"",
+    "where": "main#main > div.content \"Mission overviewCrew status and the next\"",
     "msg": "the content of section 2 runs 280px from the left and 48px from the right (read from its outermost blocks: no .wrap): 280 and 48px are not one margin; the margin is 64-120px at 1440px (one container, equal margins, 2px either way) (SR-6)",
     "fix": "use one container on every section and the nav (.wrap): one margin left and right, 64-120px on a desktop, 16-24px on a phone",
     "widths": [
@@ -326,7 +269,7 @@
      "container-edges"
     ],
     "wheres": [
-     "main#main > div.content \"OverviewCrew status and the next operati\""
+     "main#main > div.content \"Mission overviewCrew status and the next\""
     ]
    },
    {
@@ -396,7 +339,7 @@
    {
     "check": "flush",
     "where": "button#new-checkin \"Add check-in\"",
-    "msg": "its button sits 0px above the lower edge of header.page-title, where the ground changes to section#alert-banner",
+    "msg": "its button sits 0px above the lower edge of header#overview, where the ground changes to section#alert-banner",
     "fix": "give the section its padding at the edge where the ground changes (the closing call keeps a clear gap above the footer)",
     "widths": [
      390
@@ -458,22 +401,6 @@
     ]
    },
    {
-    "check": "button-styles",
-    "where": "(the page)",
-    "msg": "3 button styles on the page: soft, fill #e5f1f2 x1 (\"Overview\"); soft, fill #0d7480 x1 (\"Add check-in\"); soft, fill #ffffff, outline #d4b481 x1 (\"Review check-in\")",
-    "fix": "one primary and one secondary button: one shape, one height per size, one label size",
-    "widths": [
-     390
-    ],
-    "from": "consistency",
-    "ids": [
-     "button-styles"
-    ],
-    "wheres": [
-     "(the page)"
-    ]
-   },
-   {
     "check": "container",
     "where": "page",
     "msg": "no .wrap",
@@ -523,29 +450,9 @@
     "from": "consistency"
    },
    {
-    "check": "button-styles",
-    "where": "(the page)",
-    "msg": "3 button styles on the page: soft, fill #e5f1f2 x1 (\"Overview\"); soft, fill #0d7480 x1 (\"Add check-in\"); soft, fill #ffffff, outline #d4b481 x1 (\"Review check-in\") (inside a held section or scroll scene, whose motion --quick does not check)",
-    "fix": "one primary and one secondary button: one shape, one height per size, one label size",
-    "widths": [
-     1440
-    ],
-    "from": "consistency"
-   },
-   {
-    "check": "copy-headline",
-    "where": "h1#page-heading \"Overview\"",
-    "msg": "the h1 has 1 word (2 to 8 read at a glance)",
-    "fix": "put the category noun in the h1 (and who it is for, or where), in 2 to 8 words",
-    "widths": [
-     1440
-    ],
-    "from": "consistency"
-   },
-   {
     "check": "copy-buttons",
-    "where": "aside.sidebar > nav > button.nav-item.active \"Overview\"",
-    "msg": "\"Overview\" does not start with a verb (book, buy, try, start, get, see...) (and 1 more like it: \"Review check-in\")",
+    "where": "button#review-checkin \"Review check-in\"",
+    "msg": "\"Review check-in\" does not start with a verb (book, buy, try, start, get, see...)",
     "fix": "label buttons with a verb and what the visitor gets (\"Book a room\", \"Start free trial\")",
     "widths": [
      1440
@@ -564,18 +471,8 @@
    },
    {
     "check": "heading-scale",
-    "where": "div#overview-content > section.panel:nth-of-type(1) > div.panel-header > h2 \"Crew status\"",
-    "msg": "h2 headings in 2 sizes, 19px (\"Check-in awaiting review\") to 22px (x1.16)",
-    "fix": "size headings by level: the h1 largest, one size per level, each level below the one above",
-    "widths": [
-     1440
-    ],
-    "from": "consistency"
-   },
-   {
-    "check": "heading-scale",
     "where": "div#next-operation > div.operation-time \"09:30 UTC · 90 min\"",
-    "msg": "1 line of plain text set larger than the section headings (42px against h2 22px)",
+    "msg": "1 line of plain text set larger than the section headings (36px against h2 22px)",
     "fix": "size headings by level: the h1 largest, one size per level, each level below the one above",
     "widths": [
      1440,
@@ -615,44 +512,12 @@
     "from": "consistency"
    },
    {
-    "check": "label-centre",
-    "where": "aside.sidebar > nav > button.nav-item.active \"Overview\"",
-    "msg": "its label sits 81px off-centre (16px of room at the left, 97px at the right) (inside a held section or scroll scene, whose motion --quick does not check)",
-    "fix": "centre the label in its button, or fill the empty side with an icon",
-    "widths": [
-     1440
-    ],
-    "from": "consistency"
-   },
-   {
-    "check": "fake-button",
-    "where": "div#next-operation > span.task-badge.review \"Health review\"",
-    "msg": "\"Health review\" looks like a button (soft, fill #fcf3e4, the same look as the page's buttons) but is not a link or a button",
-    "fix": "make it a real link or button, or drop its button look",
-    "widths": [
-     1440,
-     390
-    ],
-    "from": "consistency"
-   },
-   {
     "check": "stranded-action",
     "where": "button#new-checkin \"Add check-in\"",
-    "msg": "stands 695px across from the nearest text of its block (\"Overview\") (and 1 more like it: \"Review check-in\")",
+    "msg": "stands 656px across from the nearest text of its block (\"Mission overview\") (and 1 more like it: \"Review check-in\")",
     "fix": "put the button under or beside the text it belongs to",
     "widths": [
      1440
-    ],
-    "from": "consistency"
-   },
-   {
-    "check": "button-contrast",
-    "where": "aside.sidebar > nav > button.nav-item.active \"Overview\"",
-    "msg": "the button \"Overview\" (#e5f1f2) stands only 1.15:1 off the ground around it: it reads as part of the ground, or as switched off (inside a held section or scroll scene, whose motion --quick does not check)",
-    "fix": "give the button a fill that stands at least 1.5:1 off what is around it, or an outline in the ink",
-    "widths": [
-     1440,
-     390
     ],
     "from": "consistency"
    },
@@ -661,36 +526,6 @@
     "where": "div#overview-content > section.panel:nth-of-type(1) \"Crew status\"",
     "msg": "1 section is shorter than the screen, so the next one's heading or picture shows with it: \"Crew status\" is 446px of the 900px under the nav, and \"Next operation\" shows below it",
     "fix": "give each section the screen (min-height: 100svh less the nav, its content centred), or join two short ones into one",
-    "widths": [
-     1440
-    ],
-    "from": "consistency"
-   },
-   {
-    "check": "font-load",
-    "where": ":root \"Funnel Display\"",
-    "msg": "\"Funnel Display\" is asked for by --font-display but never loaded (no font link or @font-face loads it): it shows in its fallback",
-    "fix": "load every family the type asks for: name it in the font link as start.mjs prints it, spelt as Google Fonts spells it, or ask for a family the page loads",
-    "widths": [
-     1440
-    ],
-    "from": "consistency"
-   },
-   {
-    "check": "font-load",
-    "where": ":root \"Funnel Sans\"",
-    "msg": "\"Funnel Sans\" is asked for by --font-text but never loaded (no font link or @font-face loads it): it shows in its fallback",
-    "fix": "load every family the type asks for: name it in the font link as start.mjs prints it, spelt as Google Fonts spells it, or ask for a family the page loads",
-    "widths": [
-     1440
-    ],
-    "from": "consistency"
-   },
-   {
-    "check": "font-load",
-    "where": ":root \"DM Mono\"",
-    "msg": "\"DM Mono\" is asked for by --font-mono but never loaded (no font link or @font-face loads it): it shows in its fallback",
-    "fix": "load every family the type asks for: name it in the font link as start.mjs prints it, spelt as Google Fonts spells it, or ask for a family the page loads",
     "widths": [
      1440
     ],
@@ -709,7 +544,7 @@
   ],
   "crashed": [],
   "seconds": {
-   "consistency": 57,
+   "consistency": 59,
    "layout": 13
   }
  },
@@ -780,23 +615,6 @@
    ]
   },
   {
-   "check": "button-styles",
-   "where": "(one screen)",
-   "msg": "3 button styles on one screen: soft, fill #e5f1f2 (\"Overview\"); soft, fill #0d7480 (\"Add check-in\"); soft, fill #ffffff, outline #d4b481 (\"Review check-in\"); the odd one out: \"Review check-in\"",
-   "fix": "one primary and one secondary button: one shape, one height per size, one label size",
-   "widths": [
-    1440,
-    390
-   ],
-   "from": "consistency",
-   "ids": [
-    "button-styles"
-   ],
-   "wheres": [
-    "(one screen)"
-   ]
-  },
-  {
    "check": "cta",
    "where": "div#overview-content > section.panel.next-panel \"Next operation\"",
    "msg": "the last section before the footer ends with no button",
@@ -811,55 +629,6 @@
    ],
    "wheres": [
     "div#overview-content > section.panel.next-panel \"Next operation\""
-   ]
-  },
-  {
-   "check": "copy-headline",
-   "where": "h1#page-heading \"Overview\"",
-   "msg": "\"Overview\" does not name what is sold (crew health and mission planning, crew, health, mission, from flags); only the line under it does",
-   "fix": "put the category noun in the h1 (and who it is for, or where), in 2 to 8 words",
-   "widths": [
-    1440
-   ],
-   "from": "consistency",
-   "ids": [
-    "copy-headline"
-   ],
-   "wheres": [
-    "h1#page-heading \"Overview\""
-   ]
-  },
-  {
-   "check": "heading-scale",
-   "where": "div#next-operation > h3 \"Cooling loop inspection\"",
-   "msg": "an h3 at 23px, as large as the smallest h2 (19px) or larger",
-   "fix": "size headings by level: the h1 largest, one size per level, each level below the one above",
-   "widths": [
-    1440,
-    390
-   ],
-   "from": "consistency",
-   "ids": [
-    "heading-scale"
-   ],
-   "wheres": [
-    "div#next-operation > h3 \"Cooling loop inspection\""
-   ]
-  },
-  {
-   "check": "links",
-   "where": "aside.sidebar > a.brand \"Crew Swap\"",
-   "msg": "\"Crew Swap\" goes to #overview, which is not on this page",
-   "fix": "point every link at a real section, page or file",
-   "widths": [
-    1440
-   ],
-   "from": "consistency",
-   "ids": [
-    "links"
-   ],
-   "wheres": [
-    "aside.sidebar > a.brand \"Crew Swap\""
    ]
   },
   {
@@ -896,7 +665,7 @@
   },
   {
    "check": "hero-screen",
-   "where": "main#main > div.content \"OverviewCrew status and the next operati\"",
+   "where": "main#main > div.content \"Mission overviewCrew status and the next\"",
    "msg": "836px of the next section shows on the first screen (from 64px on a 900px screen): nothing below the hero shows at load (SR-1)",
    "fix": "end the hero at the fold so nothing of the next section shows at load (hero height: 100svh)",
    "widths": [
@@ -907,13 +676,13 @@
     "hero-screen"
    ],
    "wheres": [
-    "main#main > div.content \"OverviewCrew status and the next operati\""
+    "main#main > div.content \"Mission overviewCrew status and the next\""
    ]
   },
   {
    "check": "section-height",
-   "where": "main#main > div.content \"OverviewCrew status and the next operati\"",
-   "msg": "the section is 836px tall (0.9 screens), 64px short of one screen (900px): every section after the hero is one screen or two, 2px either way (SR-2)",
+   "where": "main#main > div.content \"Mission overviewCrew status and the next\"",
+   "msg": "the section is 840px tall (0.9 screens), 60px short of one screen (900px): every section after the hero is one screen or two, 2px either way (SR-2)",
    "fix": "set the section to one screen or two (height: calc(var(--h,1) * 100vh), --h 1 or 2) and cut or split its content to fit",
    "widths": [
     1440
@@ -923,7 +692,7 @@
     "section-height"
    ],
    "wheres": [
-    "main#main > div.content \"OverviewCrew status and the next operati\""
+    "main#main > div.content \"Mission overviewCrew status and the next\""
    ]
   },
   {
@@ -940,7 +709,7 @@
    ],
    "wheres": [
     "main#main > header.topbar \"Onboard workspaceResearch replay · Ficti\"",
-    "main#main > div.content \"OverviewCrew status and the next operati\""
+    "main#main > div.content \"Mission overviewCrew status and the next\""
    ]
   },
   {
@@ -993,7 +762,7 @@
   },
   {
    "check": "container-edges",
-   "where": "main#main > div.content \"OverviewCrew status and the next operati\"",
+   "where": "main#main > div.content \"Mission overviewCrew status and the next\"",
    "msg": "the content of section 2 runs 280px from the left and 48px from the right (read from its outermost blocks: no .wrap): 280 and 48px are not one margin; the margin is 64-120px at 1440px (one container, equal margins, 2px either way) (SR-6)",
    "fix": "use one container on every section and the nav (.wrap): one margin left and right, 64-120px on a desktop, 16-24px on a phone",
    "widths": [
@@ -1004,7 +773,7 @@
     "container-edges"
    ],
    "wheres": [
-    "main#main > div.content \"OverviewCrew status and the next operati\""
+    "main#main > div.content \"Mission overviewCrew status and the next\""
    ]
   },
   {
@@ -1074,7 +843,7 @@
   {
    "check": "flush",
    "where": "button#new-checkin \"Add check-in\"",
-   "msg": "its button sits 0px above the lower edge of header.page-title, where the ground changes to section#alert-banner",
+   "msg": "its button sits 0px above the lower edge of header#overview, where the ground changes to section#alert-banner",
    "fix": "give the section its padding at the edge where the ground changes (the closing call keeps a clear gap above the footer)",
    "widths": [
     390
@@ -1136,22 +905,6 @@
    ]
   },
   {
-   "check": "button-styles",
-   "where": "(the page)",
-   "msg": "3 button styles on the page: soft, fill #e5f1f2 x1 (\"Overview\"); soft, fill #0d7480 x1 (\"Add check-in\"); soft, fill #ffffff, outline #d4b481 x1 (\"Review check-in\")",
-   "fix": "one primary and one secondary button: one shape, one height per size, one label size",
-   "widths": [
-    390
-   ],
-   "from": "consistency",
-   "ids": [
-    "button-styles"
-   ],
-   "wheres": [
-    "(the page)"
-   ]
-  },
-  {
    "check": "container",
    "where": "page",
    "msg": "no .wrap",
@@ -1170,6 +923,6 @@
   }
  ],
  "waived": [],
- "warnCount": 21,
- "at": "2026-11-15T02:55:38.415Z"
+ "warnCount": 12,
+ "at": "2026-11-15T03:10:07.439Z"
 }

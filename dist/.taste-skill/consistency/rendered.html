@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en" data-type="software" data-radius="soft" data-buttons="solid" data-motion=""><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f7f9fa">
+  <meta name="page-type" content="software">
+  <meta name="site-kind" content="software">
+  <title>Crew Swap — Crew health and mission planning</title>
+  <meta name="description" content="Review crew health, confirm duty changes, and plan mission coverage together.">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="assets/motion/motion.css">
+</head>
+<body data-view="overview">
+  <!-- Software workspace. Frost and slate palette; existing DM Sans typography.
+       User brief prioritizes distinct functional views, legibility and fewer elements. -->
+  <a class="skip-link" href="#main">Skip to content</a>
+  <aside class="sidebar">
+    <a class="brand" href="#overview">Crew Swap<span class="brand-dot" aria-hidden="true"></span></a>
+    <div class="mission-context">Ares expedition<span>Transit · Day 187</span></div>
+    <nav aria-label="Main navigation">
+      <button class="nav-item active" data-view="overview" aria-current="page">Overview</button>
+      <button class="nav-item" data-view="health">Crew health</button>
+      <button class="nav-item" data-view="plan">Mission plan</button>
+      <button class="nav-item" data-view="log">Decision log</button>
+    </nav>
+    <div class="sidebar-bottom">
+      <button class="text-button" id="sources-button">Data &amp; references</button>
+      <button class="text-button" id="reset-button">Reset demo</button>
+      <div class="operator"><strong>May Thazin</strong><span>Crew medical officer</span></div>
+    </div>
+  </aside>
+  <main id="main" tabindex="-1">
+    <header class="topbar"><span>Onboard workspace</span><span class="scenario-label">Research replay · Fictional mission</span></header>
+    <div class="content">
+      <header class="page-title" id="overview"><div><h1 id="page-heading">Mission overview</h1><p id="page-description">Crew status and the next operation.</p></div><button class="button btn primary" id="new-checkin">Add check-in</button></header>
+      <section class="alert-banner" id="alert-banner" aria-labelledby="alert-title"><div><h2 id="alert-title">Check-in awaiting review</h2><p id="alert-description">Thiri Htet needs a duty review before the next operation.</p></div><button class="button btn alert-button" id="review-checkin">Review check-in</button></section>
+      <div id="overview-content" class="overview-grid">
+        <section class="panel"><div class="panel-header"><h2>Crew status</h2><button class="text-link" data-go="health">View health</button></div><div id="overview-crew"><button class="crew-row" data-crew="ibarra"><span><strong>Aung Min</strong><span class="crew-role">Commander</span></span><span class="crew-status available">Available</span><span class="row-arrow" aria-hidden="true">↗</span></button><button class="crew-row" data-crew="chen"><span><strong>Thiri Htet</strong><span class="crew-role">Systems specialist</span></span><span class="crew-status review">Check-in needs review</span><span class="row-arrow" aria-hidden="true">↗</span></button><button class="crew-row" data-crew="alvarez"><span><strong>Kaung Htet</strong><span class="crew-role">Flight engineer</span></span><span class="crew-status available">Available</span><span class="row-arrow" aria-hidden="true">↗</span></button><button class="crew-row" data-crew="okonkwo"><span><strong>May Thazin</strong><span class="crew-role">Crew medical officer</span></span><span class="crew-status available">Available</span><span class="row-arrow" aria-hidden="true">↗</span></button></div></section>
+        <section class="panel next-panel"><div class="panel-header"><h2>Next operation</h2></div><div id="next-operation" class="next-operation"><div class="operation-time">09:30<span>UTC · 90 min</span></div><h3>Cooling loop inspection</h3><p>Thiri Htet · Aung Min</p><span class="task-badge review">Health review</span></div><div class="panel-footer"><button class="text-link" data-go="plan">View mission plan →</button></div></section>
+      </div>
+      <div id="health-workspace" class="health-workspace hidden">
+        <section id="crew-section" aria-labelledby="crew-heading"><h2 id="crew-heading">Crew members</h2><div id="crew-grid" class="crew-grid"><button class="crew-card " data-crew="ibarra" aria-pressed="false"><strong>Aung Min</strong><span class="crew-role">Commander</span><span class="crew-status available">Available</span></button><button class="crew-card selected" data-crew="chen" aria-pressed="true"><strong>Thiri Htet</strong><span class="crew-role">Systems specialist</span><span class="crew-status review">Check-in needs review</span></button><button class="crew-card " data-crew="alvarez" aria-pressed="false"><strong>Kaung Htet</strong><span class="crew-role">Flight engineer</span><span class="crew-status available">Available</span></button><button class="crew-card " data-crew="okonkwo" aria-pressed="false"><strong>May Thazin</strong><span class="crew-role">Crew medical officer</span><span class="crew-status available">Available</span></button></div></section>
+        <section class="panel health-panel" id="health-panel" aria-label="Selected crew member’s health">
+    <div class="panel-header"><div><h2>Thiri Htet</h2><p>Systems specialist</p></div><span class="crew-status review">Check-in needs review</span></div>
+    <div class="detail-main">
+      <div class="health-metrics"><div><span>Latest sleep</span><strong>4.97 <small>hours</small></strong></div><div><span>Personal reference</span><strong>7.63 <small>hours</small></strong></div><div><span>Reported fatigue</span><strong>7 <small>/ 10</small></strong></div></div>
+      <figure class="sleep-figure" aria-label="Seven sleep recordings in hours: 7.49, 7.42, 7.98, 7.12, 6.96, 6.80, 4.97. Reference 7.63 hours.">
+        <div class="chart-title"><h3>Sleep history</h3><span>2.67 h below reference</span></div>
+        <div class="chart-area"><div class="baseline" style="bottom:84.81481481481482%"></div><div class="chart-column"><div class="chart-bar" style="height:83.24074074074073%"><span>7.5</span></div></div><div class="chart-column"><div class="chart-bar" style="height:82.5%"><span>7.4</span></div></div><div class="chart-column"><div class="chart-bar" style="height:88.70370370370371%"><span>8.0</span></div></div><div class="chart-column"><div class="chart-bar" style="height:79.07407407407408%"><span>7.1</span></div></div><div class="chart-column"><div class="chart-bar" style="height:77.31481481481481%"><span>7.0</span></div></div><div class="chart-column"><div class="chart-bar" style="height:75.55555555555556%"><span>6.8</span></div></div><div class="chart-column"><div class="chart-bar" style="height:55.18518518518518%"><span>5.0</span></div></div></div>
+        <div class="chart-days"><span>12-02</span><span>12-04</span><span>12-04</span><span>12-06</span><span>12-07</span><span>12-08</span><span>12-11</span></div>
+      </figure>
+      <div class="sleep-evidence"><strong>Measured Earth-study replay · BIDSleep</strong><details><summary>View source and baseline calculation</summary><p>BIDSleep v1.0.1 · participant Bidslab00 · Earth-study replay. Latest recording 2021-12-11: 4.97 h. Personal reference = (449.5 min + 445.5 min + 479 min) / 3 / 60 = 7.63 h. Latest minus reference = -2.67 h. Latest recording excluded from baseline. Fatigue 7/10 (fictional scenario report). Short research reference; duty status requires officer review.</p><p>Sleep = expert-scored N1 + N2 + N3 + REM epochs × 30 seconds. Wake and unknown epochs are excluded. Dates use source US/Eastern time. Each recording is retained, including two starting on December 4.</p><ul><li><a href="https://physionet.org/files/bidsleep-dataset/1.0.1/Bidslab00/1/labels.mat" target="_blank" rel="noopener">2021-12-02 23:11:25</a> · 449.5 min sleep · 0 min unknown</li><li><a href="https://physionet.org/files/bidsleep-dataset/1.0.1/Bidslab00/2/labels.mat" target="_blank" rel="noopener">2021-12-04 00:31:56</a> · 445.5 min sleep · 0 min unknown</li><li><a href="https://physionet.org/files/bidsleep-dataset/1.0.1/Bidslab00/3/labels.mat" target="_blank" rel="noopener">2021-12-04 23:40:29</a> · 479 min sleep · 0 min unknown</li><li><a href="https://physionet.org/files/bidsleep-dataset/1.0.1/Bidslab00/4/labels.mat" target="_blank" rel="noopener">2021-12-06 23:36:31</a> · 427 min sleep · 0 min unknown</li><li><a href="https://physionet.org/files/bidsleep-dataset/1.0.1/Bidslab00/5/labels.mat" target="_blank" rel="noopener">2021-12-07 23:34:53</a> · 417.5 min sleep · 0 min unknown</li><li><a href="https://physionet.org/files/bidsleep-dataset/1.0.1/Bidslab00/6/labels.mat" target="_blank" rel="noopener">2021-12-08 23:39:13</a> · 408 min sleep · 0.5 min unknown</li><li><a href="https://physionet.org/files/bidsleep-dataset/1.0.1/Bidslab00/7/labels.mat" target="_blank" rel="noopener">2021-12-11 23:34:23</a> · 298 min sleep · 0 min unknown</li></ul><p>All seven source files are bundled locally with SHA-256 checksums.</p></details></div>
+      <div class="report-heading"><h3>Latest check-in</h3><span>08:32 UTC</span></div>
+      <blockquote class="quote">“Woke up several times. Having trouble concentrating this morning.”<small>Fictional scenario report</small></blockquote>
+      <div class="health-actions"><button class="button btn secondary" data-action="checkin">Update check-in</button><button class="button btn primary" data-action="status">Review duty status</button></div>
+      <p class="health-footnote">May Thazin confirms duty changes after reviewing the evidence.</p>
+    </div></section>
+      </div>
+      <section id="mission-workspace" class="panel schedule-panel hidden" aria-labelledby="schedule-heading">
+        <div class="panel-header"><div><h2 id="schedule-heading">Today’s schedule</h2><p>All times UTC</p></div><span id="version-label" class="version-label">Plan version 1</span></div>
+        <div id="schedule" class="schedule"><article class="task review-task"><div class="task-time">09:30<span>90 min</span></div><div class="task-info"><h3>Cooling loop inspection</h3><p>Thiri Htet · Aung Min</p></div><span class="task-badge review">Health review</span></article><article class="task "><div class="task-time">09:30<span>45 min</span></div><div class="task-info"><h3>Medical console coverage</h3><p>May Thazin</p></div><span class="task-badge available">Scheduled</span></article><article class="task "><div class="task-time">10:00<span>60 min</span></div><div class="task-info"><h3>Plant growth experiment</h3><p>Kaung Htet</p></div><span class="task-badge available">Scheduled</span></article><article class="task "><div class="task-time">11:15<span>45 min</span></div><div class="task-info"><h3>Resistive exercise</h3><p>Aung Min · Thiri Htet · Kaung Htet · May Thazin</p></div><span class="task-badge available">Scheduled</span></article></div>
+        <div class="schedule-footer"><p id="plan-footer">Review duty clearance before confirming coverage.</p><button class="button btn primary" id="review-options">Review coverage</button></div>
+      </section>
+      <section class="panel log-panel hidden" id="log-panel"><div class="panel-header"><h2>Recorded decisions</h2><button class="button btn secondary" id="export-log">Export log</button></div><div id="log-content"><div class="empty"><strong>Your decisions will appear here.</strong><p>Review a check-in, confirm a duty change, or approve a new plan to create the first entry.</p></div></div></section>
+      <footer class="page-footer"><span>Changes saved on this device</span><button class="text-link" id="earth-packet">Review Earth packet</button></footer>
+    </div>
+  </main>
+  <dialog id="dialog" aria-labelledby="dialog-heading"><div id="dialog-content"></div></dialog>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="data/sleep-data.js"></script>
+  <script src="app.js"></script>
+  <script type="module" src="assets/motion/motion.js"></script>
+
+
+</body></html>
