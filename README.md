@@ -4,11 +4,14 @@ Mission-readiness console for a Mars transit crew. Gather sleep and fatigue chec
 
 ## What it does
 
-1. **Gather** — review measured sleep trends and self-reported fatigue.
-2. **Evaluate** — the crew medical officer confirms whether someone stands down.
-3. **Act** — the mission plan recalculates coverage, conflicts, and an Earth handoff packet.
+1. **Gather** — BIDSleep measured nights + check-ins.
+2. **Flag** — score from real sleep + NASA-aligned &lt;6 h rules.
+3. **Confirm** — medical officer confirms (Commander reviews the medical officer).
+4. **Act** — replan coverage and Earth packet.
 
-Try: **Review check-in → Confirm stand-down → Confirm plan**.
+Try: **Confirm flag → Stand down → Confirm plan**.
+
+Sleep source: [PhysioNet BIDSleep](https://physionet.org/content/bidsleep-dataset/1.0.1/) — Aung Min→Bidslab01, Thiri Htet→Bidslab00, Kaung Htet→Bidslab02, May Thazin→Bidslab06. Auto-flag: latest sleep, baseline (first 3 nights), nights &lt;6 h, derived fatigue. Score ≥4 stand-down · 2–3 watch. Human confirms.
 
 Also available:
 
@@ -39,6 +42,29 @@ Open [http://127.0.0.1:43730](http://127.0.0.1:43730).
 On Desktop, double-click **Open Crew Swap** (`.sh` on Mac/Linux, `.cmd` on Windows) or run `npm start` from this folder.
 
 Fetching `data/sleep.json` needs HTTP — open the app through the local server, not as a raw `file://` page.
+
+## Mission assistant
+
+The floating **Ask assistant** control opens an in-console chatbot for sleep/fatigue reviews, stand-down guidance, coverage/qualifications questions, and UI navigation.
+
+- Without an API key, replies use an offline, Crew Swap–aware fallback (good for demos).
+- With a key, the server calls OpenAI Chat Completions and falls back offline if the request fails.
+
+```bash
+# PowerShell
+$env:OPENAI_API_KEY="sk-..."
+# optional model override (default gpt-4o-mini)
+$env:OPENAI_MODEL="gpt-4o-mini"
+npm start
+```
+
+```bash
+# macOS / Linux
+export OPENAI_API_KEY="sk-..."
+npm start
+```
+
+The server logs whether **live AI** or **offline demo fallback** is active. Status is also shown in the assistant panel header.
 
 ## Project layout
 

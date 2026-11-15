@@ -3,17 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#f7f9fa">
+  <meta name="theme-color" content="#070b12">
   <meta name="page-type" content="software">
   <meta name="site-kind" content="software">
+  <meta name="color-scheme" content="dark">
   <title>Crew Swap — Crew health and mission planning</title>
   <meta name="description" content="Review crew health, confirm duty changes, and plan mission coverage together.">
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="assets/motion/motion.css">
 </head>
 <body data-view="overview">
-  <!-- Software workspace. Frost and slate palette; existing DM Sans typography.
-       User brief prioritizes distinct functional views, legibility and fewer elements. -->
+  <!-- Mission console. Dark space canvas with cyan instruments and amber caution.
+       Restyle keeps views, flow, and DM Sans; atmosphere via starfield ground. -->
   <a class="skip-link" href="#main">Skip to content</a>
   <aside class="sidebar">
     <a class="brand" href="#overview">Crew Swap<span class="brand-dot" aria-hidden="true"></span></a>
@@ -31,7 +32,7 @@
     </div>
   </aside>
   <main id="main" tabindex="-1">
-    <header class="topbar"><span>Onboard workspace</span><span class="scenario-label">Research replay · Fictional mission</span></header>
+    <header class="topbar"><span>Onboard</span><span class="scenario-label">Demo</span></header>
     <div class="content">
       <header class="page-title" id="overview"><div><h1 id="page-heading">Overview</h1><p id="page-description">Crew status and the next operation.</p></div><button class="button btn primary" id="new-checkin">Add check-in</button></header>
       <section class="alert-banner" id="alert-banner" aria-labelledby="alert-title"><div><h2 id="alert-title">Check-in awaiting review</h2><p id="alert-description"></p></div><button class="button btn alert-button" id="review-checkin">Review check-in</button></section>
@@ -56,6 +57,8 @@
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script src="data/sleep-data.js"></script>
   <script src="app.js"></script>
+  <script src="assistant.js"></script>
   <script type="module" src="assets/motion/motion.js"></script>
 </body>
 </html>
+
