@@ -43,18 +43,17 @@ On Desktop, double-click **Open Crew Swap** (`.sh` on Mac/Linux, `.cmd` on Windo
 
 Fetching `data/sleep.json` needs HTTP — open the app through the local server, not as a raw `file://` page.
 
-## Mission assistant
+## Mission chat
 
-The floating **Ask assistant** control opens an in-console chatbot for sleep/fatigue reviews, stand-down guidance, coverage/qualifications questions, and UI navigation.
+The floating **Mission chat** control opens a real multi-turn chat thread (streaming replies, follow-ups, session history, New chat).
 
-- Without an API key, replies use an offline, Crew Swap–aware fallback (good for demos).
-- With a key, the server calls OpenAI Chat Completions and falls back offline if the request fails.
+- **Local chat** (default): conversational, crew-state-aware replies without an API key.
+- **Live AI**: set `OPENAI_API_KEY` (env or `.env`) for OpenAI Chat Completions with streaming; falls back to local chat if the request fails.
 
 ```bash
 # PowerShell
 $env:OPENAI_API_KEY="sk-..."
-# optional model override (default gpt-4o-mini)
-$env:OPENAI_MODEL="gpt-4o-mini"
+$env:OPENAI_MODEL="gpt-4o-mini"   # optional
 npm start
 ```
 
@@ -64,7 +63,14 @@ export OPENAI_API_KEY="sk-..."
 npm start
 ```
 
-The server logs whether **live AI** or **offline demo fallback** is active. Status is also shown in the assistant panel header.
+Or add a `.env` in the project root:
+
+```
+OPENAI_API_KEY=sk-...
+OPENAI_MODEL=gpt-4o-mini
+```
+
+The server log and chat header show **Live AI** or **Local chat**.
 
 ## Project layout
 

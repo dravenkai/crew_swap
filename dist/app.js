@@ -38,6 +38,18 @@ function loadMeasuredSleep(person){
   if(!person.reportEdited) person.fatigue=fatigueFromSleep(person.history, person.baseline, person.sleep);
   return person;
 }
+const SKILL_CATALOG = [
+  'EVA command',
+  'Cooling systems',
+  'EVA systems',
+  'Medical operations',
+  'Plant systems',
+  'Logistics'
+];
+const DEFAULT_REQUIREMENTS = {
+  coolingLoop: ['Cooling systems'],
+  commander: ['EVA command']
+};
 const initialCrew = [
   {id:'ibarra',name:'Aung Min',fullName:'Aung Min',role:'Commander',initials:'AM',sleepSubject:'Bidslab01',state:'available',skills:['EVA command'],note:'Feeling rested. Ready for the inspection.',time:'08:15'},
   {id:'chen',name:'Thiri Htet',fullName:'Thiri Htet',role:'Systems specialist',initials:'TH',sleepSubject:'Bidslab00',state:'review',skills:['Cooling systems','EVA systems'],note:'Woke up several times. Having trouble concentrating this morning.',time:'08:32'},
@@ -46,8 +58,51 @@ const initialCrew = [
 ];
 initialCrew.forEach(loadMeasuredSleep);
 const storageKey='crew-swap-ui-v2';
-const freshState=()=>({crew:structuredClone(initialCrew),assigned:'chen',inspectionDeferred:false,version:1,log:[],selected:'chen'});
-function readState(){try{const saved=JSON.parse(localStorage.getItem(storageKey));if(saved?.crew?.length===4&&saved.crew.every(c=>initialCrew.some(i=>i.id===c.id)&&Array.isArray(c.history))&&Array.isArray(saved.log))return saved;}catch{}return freshState();}
+const freshState=()=>({
+  crew:structuredClone(initialCrew),
+  assigned:'chen',
+  inspectionDeferred:false,
+  version:1,
+  log:[],
+  selected:'chen',
+  requirements:structuredClone(DEFAULT_REQUIREMENTS)
+});
+function normalizeSkills(list){
+  if(!Array.isArray(list)) return [];
+  const seen=new Set();
+  const out=[];
+  for(const raw of list){
+    const skill=String(raw||'').trim();
+    if(!skill||seen.has(skill)) continue;
+    seen.add(skill);
+    out.push(skill);
+  }
+  return out;
+}
+function normalizeRequirements(raw){
+  const next=structuredClone(DEFAULT_REQUIREMENTS);
+  if(raw&&typeof raw==='object'){
+    if(Array.isArray(raw.coolingLoop)) next.coolingLoop=normalizeSkills(raw.coolingLoop);
+    if(Array.isArray(raw.commander)) next.commander=normalizeSkills(raw.commander);
+  }
+  if(!next.coolingLoop.length) next.coolingLoop=DEFAULT_REQUIREMENTS.coolingLoop.slice();
+  if(!next.commander.length) next.commander=DEFAULT_REQUIREMENTS.commander.slice();
+  return next;
+}
+function readState(){
+  try{
+    const saved=JSON.parse(localStorage.getItem(storageKey));
+    if(saved?.crew?.length===4&&saved.crew.every(c=>initialCrew.some(i=>i.id===c.id)&&Array.isArray(c.history))&&Array.isArray(saved.log)){
+      saved.requirements=normalizeRequirements(saved.requirements);
+      for(const person of saved.crew){
+        const identity=initialCrew.find(crew=>crew.id===person.id);
+        person.skills=normalizeSkills(Array.isArray(person.skills)?person.skills:identity.skills);
+      }
+      return saved;
+    }
+  }catch{}
+  return freshState();
+}
 let state=readState();
 // Apply current crew identities to saved missions without resetting their decisions.
 const previousCrewNames = [
@@ -62,8 +117,10 @@ for (const person of state.crew) {
   person.fullName = identity.fullName;
   person.initials = identity.initials;
   person.sleepSubject = identity.sleepSubject;
+  person.skills = normalizeSkills(Array.isArray(person.skills) ? person.skills : identity.skills);
   if(person.sleepSource!=='manual') loadMeasuredSleep(person);
 }
+state.requirements = normalizeRequirements(state.requirements);
 for (const entry of state.log) {
   for (const field of ['title', 'detail']) {
     if (typeof entry[field] !== 'string') continue;
@@ -153,6 +210,17 @@ function flagPanelHtml(person){
 function persist(){try{localStorage.setItem(storageKey,JSON.stringify(state));}catch{toast('Changes are available for this session.');}}
 function addLog(title,detail){state.log.unshift({time:clock(),title,detail});}
 function toast(message){const el=document.getElementById('toast');el.textContent=message;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),3500);}
+function hasSkill(person,skill){return normalizeSkills(person?.skills).includes(skill);}
+function missingSkills(person,required){return normalizeSkills(required).filter(skill=>!hasSkill(person,skill));}
+function skillOptionsFor(person){
+  const owned=normalizeSkills(person.skills);
+  return [...new Set([...SKILL_CATALOG,...owned,(state.requirements?.coolingLoop||[]),(state.requirements?.commander||[])].flat())];
+}
+function skillsHtml(person){
+  const skills=normalizeSkills(person.skills);
+  if(!skills.length) return '<p class="skills-empty">No qualifications assigned.</p>';
+  return `<ul class="skill-list">${skills.map(skill=>`<li>${escapeText(skill)}</li>`).join('')}</ul>`;
+}
 
 function sleepEvidenceText(person) {
   if (person.sleepSource !== 'bidsleep') return 'Manual sleep values.';
@@ -188,12 +256,20 @@ function renderHealth() {
       </figure>
       ${sleepEvidence(c)}
       ${flagPanelHtml(c)}
+      <div class="report-heading"><h3>Qualifications</h3><button class="text-link" data-action="skills" type="button">Edit skills</button></div>
+      ${skillsHtml(c)}
       <div class="report-heading"><h3>Latest check-in</h3><span>${escapeText(c.time)} UTC</span></div>
       <blockquote class="quote">“${escapeText(c.note)}”</blockquote>
       <div class="health-actions"><button class="button btn secondary" data-action="checkin">Update check-in</button><button class="button btn primary" data-action="status">${c.state==='down'?'Return to duty':(c.flag||evaluateFatigueFlag(c)).recommendStandDown?'Confirm flag':'Review duty'}</button></div>
     </div>`;
 }
-function inspectionStatus(){if(state.inspectionDeferred)return 'Deferred';if(byId('ibarra').state==='down'||byId(state.assigned).state==='down'||(state.assigned==='alvarez'&&state.alvarezUnavailable))return 'Coverage gap';if(byId(state.assigned).state==='review'||byId('ibarra').state==='review')return 'Health review';return 'Scheduled';}
+function inspectionStatus(){
+  if(state.inspectionDeferred) return 'Deferred';
+  const assignee=byId(state.assigned);
+  if(commanderBlockedReason()||assignee?.state==='down'||missingSkills(assignee,coolingRequirements()).length||(state.assigned==='alvarez'&&state.alvarezUnavailable)) return 'Coverage gap';
+  if(assignee?.state==='review'||byId('ibarra').state==='review') return 'Health review';
+  return 'Scheduled';
+}
 function tasks(){const swap=state.assigned==='alvarez'&&!state.inspectionDeferred;return [
   {time:'09:30',title:'Cooling loop inspection',duration:'90 min',crew:[state.assigned,'ibarra'],status:inspectionStatus()},
   {time:'09:30',title:'Medical console coverage',duration:'45 min',crew:['okonkwo'],status:byId('okonkwo').state==='down'?'Coverage gap':'Scheduled'},
@@ -276,13 +352,156 @@ function openDuty(){
     openCoverage();
   };
 }
-function candidateReason(c){if(c.id==='alvarez' && state.alvarezUnavailable)return 'Unavailable for the inspection window';if(c.state==='down')return 'Confirmed stand-down';if(c.state==='review')return 'Health review pending';if(!c.skills.includes('Cooling systems'))return 'Cooling systems qualification required';return '';}
-function openCoverage(){const commanderDown=byId('ibarra').state!=='available';const eligible=state.crew.filter(c=>!candidateReason(c));const options=state.crew.filter(c=>c.id!=='ibarra');const selected=eligible.find(c=>c.id===state.assigned)||eligible[0];showDialog('Review coverage','MISSION PLAN / COOLING LOOP INSPECTION',`<p>09:30–11:00 UTC · Requires a cooling systems specialist and an EVA commander. Qualifications and assignments are sample mission inputs.</p>${commanderDown?'<div class="plan-notice">The EVA commander requires duty clearance. The inspection must be deferred until qualified coverage is available.</div>':''}<label class="availability-control"><input id="alvarez-available" type="checkbox" ${state.alvarezUnavailable?'':'checked'}> Kaung Htet available for this inspection <small>Scenario control · duty clearance is checked separately</small></label><form id="coverage-form">${options.map(c=>{const reason=commanderDown?'EVA commander unavailable':candidateReason(c);return `<label class="choice"><input type="radio" name="replacement" value="${c.id}" ${reason?'disabled':c.id===selected?.id?'checked':''}><strong>${c.name} · ${c.role}</strong><p>${c.skills.join(' · ')}</p>${reason?`<em>${reason}</em>`:c.id==='alvarez'?'<em>Moves plant growth experiment from 10:00 to 13:00 to avoid overlap.</em>':'<p>Available for the full inspection window.</p>'}</label>`;}).join('')}<label class="choice"><input type="radio" name="replacement" value="defer" ${commanderDown||!eligible.length?'checked':''}><strong>Defer the inspection</strong><p>Hold the task for crew review. Record the coverage gap in the Earth packet.</p></label><div class="dialog-actions"><button type="button" class="button btn secondary" data-close>Cancel</button><button type="submit" class="button btn primary">Confirm plan →</button></div></form>`);document.getElementById('alvarez-available').onchange=event=>{
-  state.alvarezUnavailable = !event.target.checked;
-  addLog('Inspection availability changed', 'Kaung Htet ' + (state.alvarezUnavailable ? 'unavailable' : 'available') + ' for the inspection window. Plan awaits confirmation.');
-  render();
-  openCoverage();
-};document.getElementById('coverage-form').onsubmit=event=>{event.preventDefault();const choice=new FormData(event.target).get('replacement');if(!choice)return;if(choice!=='defer'&&(candidateReason(byId(choice))||byId('ibarra').state!=='available'))return openCoverage();state.inspectionDeferred=choice==='defer';if(choice!=='defer')state.assigned=choice;state.version++;const description=choice==='defer'?'Cooling loop inspection deferred. Crew review required before rescheduling.':`${byId(choice).name} assigned with Aung Min.${choice==='alvarez'?' Plant growth experiment moved to 13:00 to avoid overlap.':''}`;addLog(`Mission plan v${state.version} confirmed`,description);render();showDialog('Plan updated.','CONFIRMED BY MAY THAZIN',`<p>${escapeText(description)}</p><div class="plan-notice">${state.crew.filter(c=>c.state==='down').map(c=>c.name).join(', ')||'No crew'} ${state.crew.some(c=>c.state==='down')?'currently stood down. Review return to duty when appropriate.':'currently stood down.'}</div><div class="dialog-actions"><button class="button btn secondary" data-close>Back to overview</button><button class="button btn primary" id="show-packet">Review Earth packet →</button></div>`);document.getElementById('show-packet').onclick=openPacket;};}
+function coolingRequirements(){return normalizeSkills(state.requirements?.coolingLoop?.length?state.requirements.coolingLoop:DEFAULT_REQUIREMENTS.coolingLoop);}
+function commanderRequirements(){return normalizeSkills(state.requirements?.commander?.length?state.requirements.commander:DEFAULT_REQUIREMENTS.commander);}
+function commanderBlockedReason(){
+  const commander=byId('ibarra');
+  if(commander.state==='down') return 'EVA commander stood down';
+  if(commander.state==='review') return 'EVA commander health review pending';
+  if(commander.state!=='available') return 'EVA commander unavailable';
+  const missing=missingSkills(commander,commanderRequirements());
+  if(missing.length) return `Commander missing ${missing.join(', ')}`;
+  return '';
+}
+function candidateReason(c){
+  if(c.id==='alvarez' && state.alvarezUnavailable) return 'Unavailable for the inspection window';
+  if(c.state==='down') return 'Confirmed stand-down';
+  if(c.state==='review') return 'Health review pending';
+  const missing=missingSkills(c,coolingRequirements());
+  if(missing.length) return `${missing.join(', ')} qualification required`;
+  return '';
+}
+function openQualifications(personId=state.selected){
+  const selected=byId(personId)||byId(state.selected);
+  const cooling=coolingRequirements();
+  const command=commanderRequirements();
+  const skillChoices=skillOptionsFor(selected);
+  showDialog(
+    'Edit qualifications',
+    'CREW SKILLS / MISSION REQUIREMENTS',
+    `<p>Skills are editable and drive cooling-loop coverage eligibility. Changes save on this device.</p>
+    <form id="skills-form">
+      <label class="field"><span>Crew member</span>
+        <select name="crew">${state.crew.map(p=>`<option value="${p.id}" ${p.id===selected.id?'selected':''}>${escapeText(p.name)} — ${escapeText(p.role)}</option>`).join('')}</select>
+      </label>
+      <fieldset class="skill-fieldset">
+        <legend>Skills for <span id="skills-crew-label">${escapeText(selected.name)}</span></legend>
+        <div class="skill-checks" id="skills-checkboxes">
+          ${skillChoices.map(skill=>`<label class="skill-check"><input type="checkbox" name="skill" value="${escapeText(skill)}" ${hasSkill(selected,skill)?'checked':''}> ${escapeText(skill)}</label>`).join('')}
+        </div>
+        <label class="field add-skill-field"><span>Add a custom skill</span>
+          <div class="add-skill-row"><input name="customSkill" type="text" maxlength="40" placeholder="e.g. Power systems" autocomplete="off"><button type="button" class="button btn secondary" id="add-skill">Add</button></div>
+        </label>
+      </fieldset>
+      <fieldset class="skill-fieldset">
+        <legend>Cooling loop inspection requires</legend>
+        <div class="skill-checks">
+          ${[...new Set([...SKILL_CATALOG,...cooling,...command])].map(skill=>`
+            <label class="skill-check"><input type="checkbox" name="reqCooling" value="${escapeText(skill)}" ${cooling.includes(skill)?'checked':''}> Specialist: ${escapeText(skill)}</label>
+            <label class="skill-check"><input type="checkbox" name="reqCommander" value="${escapeText(skill)}" ${command.includes(skill)?'checked':''}> Commander: ${escapeText(skill)}</label>
+          `).join('')}
+        </div>
+      </fieldset>
+      <div class="dialog-actions">
+        <button type="button" class="button btn secondary" data-close>Cancel</button>
+        <button type="submit" class="button btn primary">Save qualifications →</button>
+      </div>
+    </form>`
+  );
+  const form=document.getElementById('skills-form');
+  const boxes=document.getElementById('skills-checkboxes');
+  const label=document.getElementById('skills-crew-label');
+  const refreshCrewBoxes=()=>{
+    const person=byId(form.elements.crew.value);
+    label.textContent=person.name;
+    const options=skillOptionsFor(person);
+    boxes.innerHTML=options.map(skill=>`<label class="skill-check"><input type="checkbox" name="skill" value="${escapeText(skill)}" ${hasSkill(person,skill)?'checked':''}> ${escapeText(skill)}</label>`).join('');
+  };
+  form.elements.crew.addEventListener('change',refreshCrewBoxes);
+  document.getElementById('add-skill').onclick=()=>{
+    const value=String(form.elements.customSkill.value||'').trim();
+    if(!value) return;
+    const existing=[...boxes.querySelectorAll('input[name=skill]')].find(input=>input.value===value);
+    if(existing){
+      existing.checked=true;
+    }else{
+      boxes.insertAdjacentHTML('beforeend',`<label class="skill-check"><input type="checkbox" name="skill" value="${escapeText(value)}" checked> ${escapeText(value)}</label>`);
+    }
+    form.elements.customSkill.value='';
+  };
+  form.addEventListener('submit',event=>{
+    event.preventDefault();
+    const person=byId(form.elements.crew.value);
+    const nextSkills=normalizeSkills([...form.querySelectorAll('input[name=skill]:checked')].map(input=>input.value));
+    const nextCooling=normalizeSkills([...form.querySelectorAll('input[name=reqCooling]:checked')].map(input=>input.value));
+    const nextCommander=normalizeSkills([...form.querySelectorAll('input[name=reqCommander]:checked')].map(input=>input.value));
+    person.skills=nextSkills;
+    state.requirements={
+      coolingLoop:nextCooling.length?nextCooling:DEFAULT_REQUIREMENTS.coolingLoop.slice(),
+      commander:nextCommander.length?nextCommander:DEFAULT_REQUIREMENTS.commander.slice()
+    };
+    state.selected=person.id;
+    addLog(
+      `${person.name} qualifications updated`,
+      `${person.skills.join(' · ')||'No skills'} · loop needs ${state.requirements.coolingLoop.join(', ')} · commander needs ${state.requirements.commander.join(', ')}`
+    );
+    closeDialog();
+    render();
+    toast('Qualifications saved.');
+  });
+}
+function openCoverage(){
+  const commanderBlock=commanderBlockedReason();
+  const coolingNeed=coolingRequirements().join(', ')||'Cooling systems';
+  const commanderNeed=commanderRequirements().join(', ')||'EVA command';
+  const eligible=state.crew.filter(c=>!candidateReason(c));
+  const options=state.crew.filter(c=>c.id!=='ibarra');
+  const selected=eligible.find(c=>c.id===state.assigned)||eligible[0];
+  showDialog(
+    'Review coverage',
+    'MISSION PLAN / COOLING LOOP INSPECTION',
+    `<p>09:30–11:00 UTC · Requires <strong>${escapeText(coolingNeed)}</strong> plus a commander with <strong>${escapeText(commanderNeed)}</strong>. Skills are editable under Crew health.</p>
+    ${commanderBlock?`<div class="plan-notice">${escapeText(commanderBlock)}. The inspection must be deferred until qualified coverage is available.</div>`:''}
+    <div class="coverage-tools"><button type="button" class="button btn secondary" id="edit-skills-from-coverage">Edit qualifications</button></div>
+    <label class="availability-control"><input id="alvarez-available" type="checkbox" ${state.alvarezUnavailable?'':'checked'}> Kaung Htet available for this inspection <small>Scenario control · duty clearance is checked separately</small></label>
+    <form id="coverage-form">
+      ${options.map(c=>{
+        const reason=commanderBlock||candidateReason(c);
+        const skills=normalizeSkills(c.skills).join(' · ')||'No qualifications';
+        return `<label class="choice"><input type="radio" name="replacement" value="${c.id}" ${reason?'disabled':c.id===selected?.id?'checked':''}><strong>${escapeText(c.name)} · ${escapeText(c.role)}</strong><p>${escapeText(skills)}</p>${reason?`<em>${escapeText(reason)}</em>`:c.id==='alvarez'?'<em>Moves plant growth experiment from 10:00 to 13:00 to avoid overlap.</em>':'<p>Available for the full inspection window.</p>'}</label>`;
+      }).join('')}
+      <label class="choice"><input type="radio" name="replacement" value="defer" ${commanderBlock||!eligible.length?'checked':''}><strong>Defer the inspection</strong><p>Hold the task for crew review. Record the coverage gap in the Earth packet.</p></label>
+      <div class="dialog-actions"><button type="button" class="button btn secondary" data-close>Cancel</button><button type="submit" class="button btn primary">Confirm plan →</button></div>
+    </form>`
+  );
+  document.getElementById('edit-skills-from-coverage').onclick=()=>openQualifications(state.assigned);
+  document.getElementById('alvarez-available').onchange=event=>{
+    state.alvarezUnavailable = !event.target.checked;
+    addLog('Inspection availability changed', 'Kaung Htet ' + (state.alvarezUnavailable ? 'unavailable' : 'available') + ' for the inspection window. Plan awaits confirmation.');
+    render();
+    openCoverage();
+  };
+  document.getElementById('coverage-form').onsubmit=event=>{
+    event.preventDefault();
+    const choice=new FormData(event.target).get('replacement');
+    if(!choice) return;
+    if(choice!=='defer'&&(candidateReason(byId(choice))||commanderBlockedReason())) return openCoverage();
+    state.inspectionDeferred=choice==='defer';
+    if(choice!=='defer') state.assigned=choice;
+    state.version++;
+    const description=choice==='defer'
+      ?'Cooling loop inspection deferred. Crew review required before rescheduling.'
+      :`${byId(choice).name} assigned with Aung Min.${choice==='alvarez'?' Plant growth experiment moved to 13:00 to avoid overlap.':''}`;
+    addLog(`Mission plan v${state.version} confirmed`,description);
+    render();
+    showDialog(
+      'Plan updated.',
+      'CONFIRMED BY MAY THAZIN',
+      `<p>${escapeText(description)}</p><div class="plan-notice">${state.crew.filter(c=>c.state==='down').map(c=>c.name).join(', ')||'No crew'} ${state.crew.some(c=>c.state==='down')?'currently stood down. Review return to duty when appropriate.':'currently stood down.'}</div><div class="dialog-actions"><button class="button btn secondary" data-close>Back to overview</button><button class="button btn primary" id="show-packet">Review Earth packet →</button></div>`
+    );
+    document.getElementById('show-packet').onclick=openPacket;
+  };
+}
 function packetText(){
   refreshCrewFlags();
   const flags=state.crew.map(c=>{
@@ -297,7 +516,7 @@ function openSources(){showDialog('Data & references','PROTOTYPE',`<p>All crew s
 document.querySelector('nav').addEventListener('click',event=>{const button=event.target.closest('[data-view]');if(button)setView(button.dataset.view);});
 document.querySelector('.brand').onclick=event=>{event.preventDefault();setView('overview');};
 document.getElementById('crew-grid').onclick=event=>{const card=event.target.closest('[data-crew]');if(card){state.selected=card.dataset.crew;render();}};
-document.getElementById('health-panel').onclick=event=>{const button=event.target.closest('[data-action]');if(button?.dataset.action==='checkin')openCheckin();if(button?.dataset.action==='status')openDuty();if(button?.dataset.action==='measured'){const person=byId(state.selected);person.reportEdited=false;loadMeasuredSleep(person);const flag=applyFatigueFlag(person,{queueReview:true});addLog('BIDSleep reloaded',`${person.sleepSubject} · flag ${flag.level} ${flag.score}`);render();}};
+document.getElementById('health-panel').onclick=event=>{const button=event.target.closest('[data-action]');if(button?.dataset.action==='checkin')openCheckin();if(button?.dataset.action==='status')openDuty();if(button?.dataset.action==='skills')openQualifications(state.selected);if(button?.dataset.action==='measured'){const person=byId(state.selected);person.reportEdited=false;loadMeasuredSleep(person);const flag=applyFatigueFlag(person,{queueReview:true});addLog('BIDSleep reloaded',`${person.sleepSubject} · flag ${flag.level} ${flag.score}`);render();}};
 document.getElementById('new-checkin').onclick=openCheckin;
 document.getElementById('review-checkin').onclick=()=>{if(tasks().some(t=>t.status==='Coverage gap'))return openCoverage();const flagged=state.crew.find(p=>p.state==='review'&&(p.flag||evaluateFatigueFlag(p)).recommendStandDown);const c=flagged||state.crew.find(p=>p.state==='review');if(c){state.selected=c.id;render();openDuty();}else openPacket();};
 document.getElementById('review-options').onclick=openCoverage;

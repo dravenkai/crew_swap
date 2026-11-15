@@ -221,6 +221,7 @@ main { min-width: 0; min-height: 100vh; background: transparent; }
 .sleep-evidence li { margin: 8px 0; }
 summary { cursor: pointer; color: var(--action); padding: 10px 0; min-height: 44px; }
 .report-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 28px; }
+.report-heading h3 { margin: 0; }
 .report-heading span { font-size: 14px; color: var(--muted); }
 .quote { margin: 16px 0 26px; font-size: 17px; color: #b7c4d0; }
 .quote small { display: block; color: var(--muted); font-size: 14px; margin-top: 8px; }
@@ -319,6 +320,61 @@ dialog::backdrop { background: #02060ccc; }
 .choice strong { font-size: 16px; }
 .choice p, .choice em { font-size: 14px; color: var(--muted); display: block; margin-top: 5px; font-style: normal; }
 .plan-notice { padding: 16px 20px; background: var(--amber-bg); border: 1px solid var(--amber-line); border-radius: 6px; font-size: 15px; margin: 20px 0; color: #d4bc7e; }
+.skill-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  list-style: none;
+  margin: 0 0 20px;
+  padding: 0;
+}
+.skill-list li {
+  padding: 6px 10px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #0a1018;
+  font-size: 13px;
+  color: var(--text);
+}
+.skills-empty { color: var(--muted); font-size: 14px; margin: 0 0 20px; }
+.skill-fieldset {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 16px 18px 8px;
+  margin: 0 0 20px;
+}
+.skill-fieldset legend {
+  padding: 0 6px;
+  font-size: 14px;
+  color: var(--muted);
+}
+.skill-checks {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 16px;
+  margin-bottom: 12px;
+}
+.skill-check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 40px;
+  font-size: 15px;
+  cursor: pointer;
+}
+.skill-check input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--action);
+  flex: 0 0 auto;
+}
+.add-skill-field { margin-bottom: 8px; }
+.add-skill-row { display: grid; grid-template-columns: 1fr auto; gap: 10px; }
+.coverage-tools { margin: 0 0 16px; }
+@media (max-width: 720px) {
+  .skill-checks { grid-template-columns: 1fr; }
+  .add-skill-row { grid-template-columns: 1fr; }
+}
 .availability-control { display: block; padding: 16px 0; font-size: 16px; cursor: pointer; }
 .availability-control input { accent-color: var(--action); width: 18px; height: 18px; vertical-align: middle; margin-right: 6px; }
 .availability-control small { display: block; color: var(--muted); margin: 6px 0 0 28px; font-size: 14px; }
@@ -480,15 +536,19 @@ dialog::backdrop { background: #02060ccc; }
   color: color-mix(in oklab, var(--action) 75%, var(--muted));
   border-color: color-mix(in oklab, var(--action) 30%, var(--line));
 }
-.assistant-close {
+.assistant-close,
+.assistant-icon-btn {
   display: inline-flex; align-items: center; justify-content: center;
   min-width: 40px; height: 40px; border: 0; border-radius: 6px;
   background: #1a2530; color: var(--text); font-size: 22px; line-height: 1;
 }
-.assistant-close:hover { background: #243240; }
+.assistant-icon-btn { font-size: 16px; }
+.assistant-close:hover,
+.assistant-icon-btn:hover { background: #243240; }
 .assistant-messages {
   flex: 1; overflow: auto; padding: 16px 16px 8px;
   display: flex; flex-direction: column; gap: 12px;
+  scroll-behavior: smooth;
 }
 .assistant-msg { display: flex; gap: 10px; max-width: 100%; }
 .assistant-msg--user { justify-content: flex-end; }
@@ -530,6 +590,8 @@ dialog::backdrop { background: #02060ccc; }
 .assistant-suggestions {
   display: flex; flex-wrap: wrap; gap: 8px; padding: 0 16px 12px;
 }
+.assistant-suggestions[hidden] { display: none !important; }
+.assistant-stream { white-space: normal; }
 .assistant-chip {
   border: 1px solid var(--line); border-radius: 999px;
   background: #0a1018; color: color-mix(in oklab, var(--action) 80%, var(--muted));
