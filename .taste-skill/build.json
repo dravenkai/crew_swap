@@ -1,0 +1,11 @@
+{
+ "page": "dist/index.html",
+ "url": null,
+ "root": "dist",
+ "kind": "software",
+ "category": "Crew health and mission planning",
+ "primary": "Review check-in",
+ "rounds": 3,
+ "start": "2026-11-15T02:45:30.445Z",
+ "by": "gate.mjs --start"
+}

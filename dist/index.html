@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en" data-type="software" data-radius="soft" data-buttons="solid" data-motion>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f7f9fa">
+  <meta name="page-type" content="software">
+  <meta name="site-kind" content="software">
+  <title>Crew Swap — Crew health and mission planning</title>
+  <meta name="description" content="Review crew health, confirm duty changes, and plan mission coverage together.">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="assets/motion/motion.css">
+</head>
+<body data-view="overview">
+  <!-- Software workspace. Frost and slate palette; existing DM Sans typography.
+       User brief prioritizes distinct functional views, legibility and fewer elements. -->
+  <a class="skip-link" href="#main">Skip to content</a>
+  <aside class="sidebar">
+    <a class="brand" href="#overview">Crew Swap<span class="brand-dot" aria-hidden="true"></span></a>
+    <div class="mission-context">Ares expedition<span>Transit · Day 187</span></div>
+    <nav aria-label="Main navigation">
+      <button class="nav-item active" data-view="overview" aria-current="page">Overview</button>
+      <button class="nav-item" data-view="health">Crew health</button>
+      <button class="nav-item" data-view="plan">Mission plan</button>
+      <button class="nav-item" data-view="log">Decision log</button>
+    </nav>
+    <div class="sidebar-bottom">
+      <button class="text-button" id="sources-button">Data & references</button>
+      <button class="text-button" id="reset-button">Reset demo</button>
+      <div class="operator"><strong>May Thazin</strong><span>Crew medical officer</span></div>
+    </div>
+  </aside>
+  <main id="main" tabindex="-1">
+    <header class="topbar"><span>Onboard workspace</span><span class="scenario-label">Research replay · Fictional mission</span></header>
+    <div class="content">
+      <header class="page-title" id="overview"><div><h1 id="page-heading">Overview</h1><p id="page-description">Crew status and the next operation.</p></div><button class="button btn primary" id="new-checkin">Add check-in</button></header>
+      <section class="alert-banner" id="alert-banner" aria-labelledby="alert-title"><div><h2 id="alert-title">Check-in awaiting review</h2><p id="alert-description"></p></div><button class="button btn alert-button" id="review-checkin">Review check-in</button></section>
+      <div id="overview-content" class="overview-grid">
+        <section class="panel"><div class="panel-header"><h2>Crew status</h2><button class="text-link" data-go="health">View health</button></div><div id="overview-crew"></div></section>
+        <section class="panel next-panel"><div class="panel-header"><h2>Next operation</h2></div><div id="next-operation" class="next-operation"></div><div class="panel-footer"><button class="text-link" data-go="plan">View mission plan →</button></div></section>
+      </div>
+      <div id="health-workspace" class="health-workspace hidden">
+        <section id="crew-section" aria-labelledby="crew-heading"><h2 id="crew-heading">Crew members</h2><div id="crew-grid" class="crew-grid"></div></section>
+        <section class="panel health-panel" id="health-panel" aria-label="Selected crew member’s health"></section>
+      </div>
+      <section id="mission-workspace" class="panel schedule-panel hidden" aria-labelledby="schedule-heading">
+        <div class="panel-header"><div><h2 id="schedule-heading">Today’s schedule</h2><p>All times UTC</p></div><span id="version-label" class="version-label"></span></div>
+        <div id="schedule" class="schedule"></div>
+        <div class="schedule-footer"><p id="plan-footer"></p><button class="button btn primary" id="review-options">Review coverage</button></div>
+      </section>
+      <section class="panel log-panel hidden" id="log-panel"><div class="panel-header"><h2>Recorded decisions</h2><button class="button btn secondary" id="export-log">Export log</button></div><div id="log-content"></div></section>
+      <footer class="page-footer"><span>Changes saved on this device</span><button class="text-link" id="earth-packet">Review Earth packet</button></footer>
+    </div>
+  </main>
+  <dialog id="dialog" aria-labelledby="dialog-heading"><div id="dialog-content"></div></dialog>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="data/sleep-data.js"></script>
+  <script src="app.js"></script>
+  <script type="module" src="assets/motion/motion.js"></script>
+</body>
+</html>

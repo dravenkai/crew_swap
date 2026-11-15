@@ -1,0 +1,1 @@
+{"name":"crew-swap","version":"1.0.0","private":true,"description":"Crew health and mission replanning interface prototype","scripts":{"start":"node server.cjs","check":"node --check dist/app.js"}}
