@@ -1,2 +1,5 @@
-.taste-skill/chrome-*
-.taste-skill/chrome-check/
+.taste-skill/
+.openai/
+.env
+.env.local
+*.pem

@@ -43,34 +43,27 @@ On Desktop, double-click **Open Crew Swap** (`.sh` on Mac/Linux, `.cmd` on Windo
 
 Fetching `data/sleep.json` needs HTTP — open the app through the local server, not as a raw `file://` page.
 
-## Mission chat
+## Mission chat (Live AI)
 
-The floating **Mission chat** control opens a real multi-turn chat thread (streaming replies, follow-ups, session history, New chat).
+The floating **Mission chat** control is a real multi-turn AI chat (streaming). **Gemini is the default provider.**
 
-- **Local chat** (default): conversational, crew-state-aware replies without an API key.
-- **Live AI**: set `OPENAI_API_KEY` (env or `.env`) for OpenAI Chat Completions with streaming; falls back to local chat if the request fails.
+1. Copy `.env.example` → `.env` (or edit the existing `.env`)
+2. Set:
+
+```
+GEMINI_API_KEY=your-key-here
+GEMINI_MODEL=gemini-3.6-flash
+```
+
+Get a key: [Google AI Studio](https://aistudio.google.com/apikey)
+
+3. Restart:
 
 ```bash
-# PowerShell
-$env:OPENAI_API_KEY="sk-..."
-$env:OPENAI_MODEL="gpt-4o-mini"   # optional
 npm start
 ```
 
-```bash
-# macOS / Linux
-export OPENAI_API_KEY="sk-..."
-npm start
-```
-
-Or add a `.env` in the project root:
-
-```
-OPENAI_API_KEY=sk-...
-OPENAI_MODEL=gpt-4o-mini
-```
-
-The server log and chat header show **Live AI** or **Local chat**.
+Header should show **Live AI · Gemini**. OpenAI still works if you set `OPENAI_API_KEY` (or `AI_PROVIDER=openai`).
 
 ## Project layout
 

@@ -63,18 +63,25 @@
     } catch {
       /* ignore */
     }
-    return { messages: [], mode: 'local' };
+    return { messages: [], mode: 'setup' };
   }
 
   function saveChat(state) {
     try {
       sessionStorage.setItem(CHAT_KEY, JSON.stringify({
         messages: state.messages.slice(-40),
-        mode: state.mode
+        mode: state.mode,
+        provider: state.provider || null
       }));
     } catch {
       /* ignore quota */
     }
+  }
+
+  function modeLabel(mode, provider) {
+    if (mode === 'live') return provider === 'gemini' ? 'Live AI · Gemini' : provider === 'openai' ? 'Live AI · OpenAI' : 'Live AI';
+    if (mode === 'setup') return 'Needs API key';
+    return 'Offline';
   }
 
   function mount() {
@@ -123,7 +130,8 @@
 
     const chat = loadChat();
     let busy = false;
-    let mode = chat.mode || 'local';
+    let mode = chat.mode === 'live' ? 'live' : 'setup';
+    let provider = chat.provider || null;
 
     function setOpen(open) {
       panel.hidden = !open;
@@ -137,9 +145,9 @@
     }
 
     function updateModeLabel(notice) {
-      const label = mode === 'live' ? 'Live AI' : 'Local chat';
+      const label = modeLabel(mode, provider);
       modeEl.textContent = label;
-      modeEl.dataset.mode = mode === 'live' ? 'live' : 'fallback';
+      modeEl.dataset.mode = mode === 'live' ? 'live' : 'setup';
       modeEl.title = notice || label;
     }
 
@@ -163,14 +171,16 @@
       if (!chat.messages.length) {
         appendMessage(
           'assistant',
-          'This is a live chat thread for the mission console. Ask about the current crew, stand-down, coverage, or what to click next — follow-ups stay in context.'
+          mode === 'live'
+            ? 'Live AI is ready. Ask about crew status, stand-down, coverage, or what to click next.'
+            : 'Add a Gemini API key to enable Live AI chat.\n\nSet `GEMINI_API_KEY` in `.env` (from https://aistudio.google.com/apikey), then restart `npm start`.'
         );
       } else {
         for (const turn of chat.messages) {
           appendMessage(turn.role, turn.content, turn.notice, true);
         }
       }
-      renderSuggestions();
+      renderSuggestions(mode === 'live' ? undefined : []);
       updateModeLabel();
     }
 
@@ -242,13 +252,17 @@
         const response = await fetch('/api/chat');
         if (!response.ok) throw new Error('status failed');
         const data = await response.json();
-        mode = data.mode === 'live' ? 'live' : 'local';
+        mode = data.mode === 'live' ? 'live' : 'setup';
+        provider = data.provider || null;
       } catch {
-        mode = 'local';
+        mode = 'setup';
+        provider = null;
       }
       chat.mode = mode;
+      chat.provider = provider;
       updateModeLabel();
       saveChat(chat);
+      if (!chat.messages.length) paintMessages();
     }
 
     async function sendMessage(raw) {
@@ -312,7 +326,8 @@
                 continue;
               }
               if (event.type === 'meta') {
-                mode = event.mode === 'live' ? 'live' : 'local';
+                mode = event.mode === 'live' ? 'live' : event.mode === 'setup' ? 'setup' : mode;
+                if (event.provider) provider = event.provider;
                 notice = event.notice || notice;
                 updateModeLabel(notice);
                 if (notice) bubble.setNotice(notice);
@@ -320,7 +335,8 @@
                 replyText += event.text || '';
                 bubble.setText(replyText);
               } else if (event.type === 'done') {
-                mode = event.mode === 'live' ? 'live' : mode;
+                if (event.mode === 'live' || event.mode === 'setup') mode = event.mode;
+                if (event.provider) provider = event.provider;
                 followUps = Array.isArray(event.followUps) ? event.followUps : [];
                 updateModeLabel(notice);
               } else if (event.type === 'error') {
@@ -339,8 +355,8 @@
         } else {
           setTyping(false);
           const data = await response.json().catch(() => ({}));
-          mode = data.mode === 'live' ? 'live' : 'local';
-          replyText = data.reply || 'No reply returned.';
+          mode = data.mode === 'live' ? 'live' : data.mode === 'setup' ? 'setup' : mode;
+          replyText = data.reply || data.error || 'No reply returned.';
           notice = data.notice || '';
           followUps = Array.isArray(data.followUps) ? data.followUps : [];
           chat.messages.push({ role: 'assistant', content: replyText, notice: notice || undefined });
@@ -350,11 +366,12 @@
       } catch {
         setTyping(false);
         replyText =
-          'I could not reach the local chat endpoint. Keep the Crew Swap server running (`npm start`) and try again.';
+          'Could not reach the chat API. Keep the Crew Swap server running (`npm start`) and try again.';
         chat.messages.push({ role: 'assistant', content: replyText });
         appendMessage('assistant', replyText);
       } finally {
         chat.mode = mode;
+        chat.provider = provider;
         saveChat(chat);
         renderSuggestions(followUps);
         busy = false;

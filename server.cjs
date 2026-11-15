@@ -2,12 +2,37 @@ const http = require('node:http');
 const fs = require('node:fs');
 const path = require('node:path');
 
-loadEnvFile(path.join(__dirname, '.env'));
-
 const root = path.join(__dirname, 'dist');
 const port = Number(process.env.CREW_SWAP_PORT || 43730);
-const openaiKey = process.env.OPENAI_API_KEY || '';
-const openaiModel = process.env.OPENAI_MODEL || 'gpt-4o-mini';
+const envPath = path.join(__dirname, '.env');
+
+loadEnvFile(envPath);
+
+function getAiConfig() {
+  // Re-read .env each request so a new key works after save (restart still safest).
+  loadEnvFile(envPath, { override: true });
+  const geminiKey = String(process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || '').trim();
+  const openaiKey = String(process.env.OPENAI_API_KEY || '').trim();
+  const prefer = String(process.env.AI_PROVIDER || '').trim().toLowerCase();
+
+  const gemini = {
+    provider: 'gemini',
+    key: geminiKey,
+    model: String(process.env.GEMINI_MODEL || 'gemini-3.6-flash').trim() || 'gemini-3.6-flash'
+  };
+  const openai = {
+    provider: 'openai',
+    key: openaiKey,
+    model: String(process.env.OPENAI_MODEL || 'gpt-4o-mini').trim() || 'gpt-4o-mini'
+  };
+
+  if (prefer === 'gemini' && geminiKey) return gemini;
+  if (prefer === 'openai' && openaiKey) return openai;
+  // Default: Gemini first (this project is set up for your Gemini key).
+  if (geminiKey) return gemini;
+  if (openaiKey) return openai;
+  return { provider: null, key: '', model: null };
+}
 
 const types = {
   '.html': 'text/html; charset=utf-8',
@@ -23,21 +48,21 @@ const types = {
 
 const SYSTEM_PROMPT = `You are the Mission Assistant for Crew Swap, a Mars-transit mission-readiness console (Ares expedition, Transit Day 187).
 
-You are in a live chat with the operator. Hold a real conversation:
-- Remember earlier turns in this thread and resolve follow-ups (“her”, “that task”, “yes”, “what next?”).
-- Ask a short clarifying question when the request is ambiguous.
-- Keep replies concise (usually 2–5 short sentences or a tight bullet list). Prefer concrete UI next steps.
-- Do not invent medical diagnoses. Duty decisions stay with the medical officer.
-- Use the live crew/context snapshot when answering about current status.
+You are a real AI chat assistant in a live thread with the operator:
+- Answer the user's actual question. Do not dump a full crew roster unless they ask for status/overview.
+- Remember earlier turns and resolve follow-ups (“her”, “that task”, “yes”, “what next?”).
+- Keep replies concise (2–5 short sentences or a tight bullet list). Prefer concrete UI clicks.
+- Do not invent medical diagnoses. Duty decisions stay with humans.
+- Use the live crew/context snapshot for current status.
 
 Domain:
-- Flow: Gather (sleep + fatigue) → Evaluate (stand-down / available) → Act (replan coverage + Earth packet).
-- Default crew: Aung Min (Commander), Thiri Htet (Systems specialist — often flagged first), Kaung Htet (Flight engineer), May Thazin (Crew medical officer).
-- Skills and cooling-loop / commander requirements are editable (Crew health → Edit skills).
-- Cooling loop inspection needs configured specialist + commander skills. Stand-down opens coverage gaps.
+- Flow: Gather → auto-flag → human confirm → replan coverage + Earth packet.
+- Crew: Aung Min (Commander), Thiri Htet (Systems specialist), Kaung Htet (Flight engineer), May Thazin (Crew medical officer).
+- Sleep: PhysioNet BIDSleep subjects (Bidslab01/00/02/06). Auto-flag uses sleep, baseline, <6 h nights, derived fatigue; score ≥4 recommends stand-down.
+- Medical officer reviews other crew; Commander reviews the medical officer (no self-clearance).
 - Views: Overview, Crew health, Mission plan, Decision log.`;
 
-function loadEnvFile(filePath) {
+function loadEnvFile(filePath, { override = false } = {}) {
   try {
     const text = fs.readFileSync(filePath, 'utf8');
     for (const raw of text.split(/\r?\n/)) {
@@ -50,11 +75,25 @@ function loadEnvFile(filePath) {
       if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
         value = value.slice(1, -1);
       }
-      if (key && process.env[key] == null) process.env[key] = value;
+      if (!key) continue;
+      if (override || process.env[key] == null || process.env[key] === '') process.env[key] = value;
     }
   } catch {
     /* optional .env */
   }
+}
+
+function setupReply() {
+  return {
+    reply:
+      'Live AI is not configured yet.\n\n' +
+      '1. Copy `.env.example` → `.env`\n' +
+      '2. Set `GEMINI_API_KEY=...` (from https://aistudio.google.com/apikey)\n' +
+      '3. Restart with `npm start`\n\n' +
+      'Optional: `OPENAI_API_KEY` still works as a fallback. Header should show **Live AI**.',
+    mode: 'setup',
+    followUps: []
+  };
 }
 
 function readBody(request) {
@@ -251,29 +290,31 @@ function buildLocalReply(message, history, context) {
 
   return {
     reply,
-    mode: openaiKey ? 'live' : 'local',
+    mode: 'local',
     followUps: followUpsFor(topic, context),
     topic
   };
 }
 
-async function openaiReply(message, history, context) {
+function contextBlock(context) {
+  return (
+    'Operator context snapshot (use only as needed):\n' +
+    crewSnippet(context) +
+    (context?.view ? `\nCurrent view: ${context.view}` : '') +
+    (context?.selected ? `\nSelected crew id: ${context.selected}` : '') +
+    (context?.assigned ? `\nCooling loop assignee id: ${context.assigned}` : '') +
+    (context?.requirements ? `\nRequirements: ${JSON.stringify(context.requirements)}` : '')
+  );
+}
+
+function buildChatMessages(message, history, context) {
   const messages = [
     { role: 'system', content: SYSTEM_PROMPT },
-    {
-      role: 'system',
-      content:
-        'Operator context snapshot:\n' +
-        crewSnippet(context) +
-        (context?.view ? `\nCurrent view: ${context.view}` : '') +
-        (context?.selected ? `\nSelected crew id: ${context.selected}` : '') +
-        (context?.assigned ? `\nCooling loop assignee id: ${context.assigned}` : '') +
-        (context?.requirements ? `\nRequirements: ${JSON.stringify(context.requirements)}` : '')
-    }
+    { role: 'system', content: contextBlock(context) }
   ];
 
   if (Array.isArray(history)) {
-    for (const turn of history.slice(-12)) {
+    for (const turn of history.slice(-16)) {
       if (!turn || !turn.content) continue;
       const role = turn.role === 'assistant' ? 'assistant' : 'user';
       messages.push({ role, content: String(turn.content).slice(0, 4000) });
@@ -281,30 +322,119 @@ async function openaiReply(message, history, context) {
   }
 
   messages.push({ role: 'user', content: String(message).slice(0, 4000) });
+  return messages;
+}
 
+function buildGeminiBody(message, history, context) {
+  const contents = [];
+  if (Array.isArray(history)) {
+    for (const turn of history.slice(-16)) {
+      if (!turn || !turn.content) continue;
+      const role = turn.role === 'assistant' ? 'model' : 'user';
+      const text = String(turn.content).slice(0, 4000);
+      const last = contents[contents.length - 1];
+      if (last && last.role === role) {
+        last.parts[0].text += '\n' + text;
+      } else {
+        contents.push({ role, parts: [{ text }] });
+      }
+    }
+  }
+  const userText = String(message).slice(0, 4000);
+  const last = contents[contents.length - 1];
+  if (last && last.role === 'user') {
+    last.parts[0].text += '\n' + userText;
+  } else {
+    contents.push({ role: 'user', parts: [{ text: userText }] });
+  }
+
+  return {
+    system_instruction: {
+      parts: [{ text: SYSTEM_PROMPT + '\n\n' + contextBlock(context) }]
+    },
+    contents,
+    generationConfig: {
+      temperature: 0.4,
+      maxOutputTokens: 800
+    }
+  };
+}
+
+async function openaiReply(message, history, context, { key, model }) {
   const upstream = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
     headers: {
-      Authorization: `Bearer ${openaiKey}`,
+      Authorization: `Bearer ${key}`,
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      model: openaiModel,
-      temperature: 0.5,
-      max_tokens: 700,
+      model,
+      temperature: 0.4,
+      max_tokens: 800,
       stream: true,
-      messages
+      messages: buildChatMessages(message, history, context)
     })
   });
 
   if (!upstream.ok) {
     const detail = await upstream.text().catch(() => '');
-    const error = new Error(`OpenAI error ${upstream.status}`);
+    const error = new Error(`OpenAI error ${upstream.status}${detail ? `: ${detail.slice(0, 180)}` : ''}`);
     error.detail = detail.slice(0, 300);
     throw error;
   }
 
   return upstream;
+}
+
+function isRetryableAiError(error) {
+  const text = `${error?.message || ''} ${error?.detail || ''}`;
+  return /\b(503|429|UNAVAILABLE|high demand|try again later|fetch failed|ECONNRESET|ETIMEDOUT)\b/i.test(text);
+}
+
+async function withAiRetry(task, { attempts = 3, delayMs = 700 } = {}) {
+  let lastError;
+  for (let i = 0; i < attempts; i += 1) {
+    try {
+      return await task();
+    } catch (error) {
+      lastError = error;
+      console.warn(`AI attempt ${i + 1}/${attempts} failed:`, formatAiError(error));
+      if (i === attempts - 1 || !isRetryableAiError(error)) throw error;
+      await new Promise((resolve) => setTimeout(resolve, delayMs * (i + 1)));
+    }
+  }
+  throw lastError;
+}
+
+async function geminiReply(message, history, context, { key, model }) {
+  return withAiRetry(async () => {
+    const url =
+      `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:streamGenerateContent` +
+      `?alt=sse&key=${encodeURIComponent(key)}`;
+    const upstream = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(buildGeminiBody(message, history, context))
+    });
+
+    if (!upstream.ok) {
+      const detail = await upstream.text().catch(() => '');
+      const error = new Error(`Gemini error ${upstream.status}${detail ? `: ${detail.slice(0, 240)}` : ''}`);
+      error.detail = detail.slice(0, 400);
+      throw error;
+    }
+
+    return upstream;
+  });
+}
+
+function formatAiError(error) {
+  const cause = error?.cause;
+  const bits = [error?.message || 'unknown error'];
+  if (cause?.code) bits.push(String(cause.code));
+  if (cause?.message && cause.message !== error.message) bits.push(String(cause.message));
+  if (error?.detail) bits.push(String(error.detail).slice(0, 200));
+  return bits.filter(Boolean).join(' · ');
 }
 
 async function streamOpenAI(upstream, response) {
@@ -323,7 +453,7 @@ async function streamOpenAI(upstream, response) {
       const trimmed = line.trim();
       if (!trimmed.startsWith('data:')) continue;
       const data = trimmed.slice(5).trim();
-      if (data === '[DONE]') continue;
+      if (!data || data === '[DONE]') continue;
       try {
         const json = JSON.parse(data);
         const token = json?.choices?.[0]?.delta?.content;
@@ -340,6 +470,86 @@ async function streamOpenAI(upstream, response) {
   return full.trim();
 }
 
+async function streamGemini(upstream, response) {
+  const reader = upstream.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+  let full = '';
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    const parts = buffer.split('\n');
+    buffer = parts.pop() || '';
+    for (const line of parts) {
+      const trimmed = line.trim();
+      if (!trimmed.startsWith('data:')) continue;
+      const data = trimmed.slice(5).trim();
+      if (!data || data === '[DONE]') continue;
+      try {
+        const json = JSON.parse(data);
+        const partsOut = json?.candidates?.[0]?.content?.parts || [];
+        for (const part of partsOut) {
+          if (part?.text) {
+            full += part.text;
+            sse(response, { type: 'token', text: part.text });
+          }
+        }
+      } catch {
+        /* ignore partial */
+      }
+    }
+  }
+
+  return full.trim();
+}
+
+async function completeOpenAI(message, history, context, { key, model }) {
+  const upstream = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${key}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      model,
+      temperature: 0.4,
+      max_tokens: 800,
+      messages: buildChatMessages(message, history, context)
+    })
+  });
+  if (!upstream.ok) {
+    const detail = await upstream.text().catch(() => '');
+    throw new Error(`OpenAI error ${upstream.status}${detail ? `: ${detail.slice(0, 180)}` : ''}`);
+  }
+  const data = await upstream.json();
+  const reply = data?.choices?.[0]?.message?.content?.trim();
+  if (!reply) throw new Error('Empty model response');
+  return reply;
+}
+
+async function completeGemini(message, history, context, { key, model }) {
+  return withAiRetry(async () => {
+    const url =
+      `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent` +
+      `?key=${encodeURIComponent(key)}`;
+    const upstream = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(buildGeminiBody(message, history, context))
+    });
+    if (!upstream.ok) {
+      const detail = await upstream.text().catch(() => '');
+      throw new Error(`Gemini error ${upstream.status}${detail ? `: ${detail.slice(0, 180)}` : ''}`);
+    }
+    const data = await upstream.json();
+    const reply = (data?.candidates?.[0]?.content?.parts || []).map((p) => p.text || '').join('').trim();
+    if (!reply) throw new Error('Empty model response');
+    return reply;
+  });
+}
+
 async function streamText(response, text, delayMs = 12) {
   const chunks = String(text).match(/\s+|\S+/g) || [text];
   for (const chunk of chunks) {
@@ -349,12 +559,16 @@ async function streamText(response, text, delayMs = 12) {
 }
 
 async function handleChat(request, response) {
+  const ai = getAiConfig();
+
   if (request.method === 'GET') {
     sendJson(response, 200, {
       ok: true,
-      mode: openaiKey ? 'live' : 'local',
-      model: openaiKey ? openaiModel : null,
-      chat: true
+      mode: ai.key ? 'live' : 'setup',
+      provider: ai.provider || null,
+      model: ai.key ? ai.model : null,
+      chat: true,
+      configured: Boolean(ai.key)
     });
     return;
   }
@@ -382,88 +596,75 @@ async function handleChat(request, response) {
   const context = payload.context && typeof payload.context === 'object' ? payload.context : {};
   const wantStream = payload.stream !== false;
 
-  if (!wantStream) {
-    if (openaiKey) {
-      try {
-        const upstream = await fetch('https://api.openai.com/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${openaiKey}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            model: openaiModel,
-            temperature: 0.5,
-            max_tokens: 700,
-            messages: [
-              { role: 'system', content: SYSTEM_PROMPT },
-              { role: 'system', content: 'Operator context snapshot:\n' + crewSnippet(context) },
-              ...history.slice(-12).map((turn) => ({
-                role: turn.role === 'assistant' ? 'assistant' : 'user',
-                content: String(turn.content || '').slice(0, 4000)
-              })),
-              { role: 'user', content: message.slice(0, 4000) }
-            ]
-          })
-        });
-        if (!upstream.ok) throw new Error(`OpenAI error ${upstream.status}`);
-        const data = await upstream.json();
-        const reply = data?.choices?.[0]?.message?.content?.trim();
-        if (!reply) throw new Error('Empty model response');
-        sendJson(response, 200, {
-          reply,
-          mode: 'live',
-          followUps: followUpsFor(topicFrom(message + ' ' + reply), context)
-        });
-        return;
-      } catch (error) {
-        const local = buildLocalReply(message, history, context);
-        sendJson(response, 200, {
-          ...local,
-          mode: 'local',
-          notice: 'Live AI unavailable; continuing in local chat. ' + (error.message || '')
-        });
-        return;
-      }
+  if (!ai.key) {
+    const setup = setupReply();
+    if (!wantStream) {
+      sendJson(response, 200, setup);
+      return;
     }
+    beginSse(response);
+    sse(response, { type: 'meta', mode: 'setup' });
+    await streamText(response, setup.reply, 8);
+    sse(response, { type: 'done', mode: 'setup', followUps: [] });
+    response.end();
+    return;
+  }
 
-    sendJson(response, 200, buildLocalReply(message, history, context));
+  if (!wantStream) {
+    try {
+      const reply =
+        ai.provider === 'gemini'
+          ? await completeGemini(message, history, context, ai)
+          : await completeOpenAI(message, history, context, ai);
+      sendJson(response, 200, {
+        reply,
+        mode: 'live',
+        provider: ai.provider,
+        followUps: followUpsFor(topicFrom(message + ' ' + reply), context)
+      });
+    } catch (error) {
+      sendJson(response, 502, {
+        error: formatAiError(error) || 'Live AI request failed',
+        mode: 'live',
+        provider: ai.provider
+      });
+    }
     return;
   }
 
   beginSse(response);
-
-  if (openaiKey) {
-    try {
-      sse(response, { type: 'meta', mode: 'live', model: openaiModel });
-      const upstream = await openaiReply(message, history, context);
-      const full = await streamOpenAI(upstream, response);
-      sse(response, {
-        type: 'done',
-        mode: 'live',
-        followUps: followUpsFor(topicFrom(message + ' ' + full), context)
-      });
+  try {
+    sse(response, { type: 'meta', mode: 'live', provider: ai.provider, model: ai.model });
+    const upstream =
+      ai.provider === 'gemini'
+        ? await geminiReply(message, history, context, ai)
+        : await openaiReply(message, history, context, ai);
+    const full =
+      ai.provider === 'gemini'
+        ? await streamGemini(upstream, response)
+        : await streamOpenAI(upstream, response);
+    if (!full) throw new Error('Empty model response');
+    sse(response, {
+      type: 'done',
+      mode: 'live',
+      provider: ai.provider,
+      followUps: followUpsFor(topicFrom(message + ' ' + full), context)
+    });
+    response.end();
+  } catch (error) {
+    const detail = formatAiError(error);
+    const hint =
+      ai.provider === 'gemini'
+        ? 'Check GEMINI_API_KEY / GEMINI_MODEL at aistudio.google.com/apikey, then restart npm start.'
+        : 'Check OPENAI_API_KEY / OPENAI_MODEL, then try again.';
+    const errText = `Live AI failed: ${detail}\n\n${hint}`;
+    sse(response, { type: 'meta', mode: 'live', provider: ai.provider, notice: detail });
+    if (!response.writableEnded) {
+      await streamText(response, errText, 6);
+      sse(response, { type: 'done', mode: 'live', provider: ai.provider, followUps: [] });
       response.end();
-      return;
-    } catch (error) {
-      const local = buildLocalReply(message, history, context);
-      sse(response, {
-        type: 'meta',
-        mode: 'local',
-        notice: 'Live AI unavailable; continuing in local chat. ' + (error.message || '')
-      });
-      await streamText(response, local.reply, 8);
-      sse(response, { type: 'done', mode: 'local', followUps: local.followUps });
-      response.end();
-      return;
     }
   }
-
-  const local = buildLocalReply(message, history, context);
-  sse(response, { type: 'meta', mode: 'local' });
-  await streamText(response, local.reply, 10);
-  sse(response, { type: 'done', mode: 'local', followUps: local.followUps });
-  response.end();
 }
 
 function serveStatic(url, response) {
@@ -500,6 +701,7 @@ const server = http.createServer(async (request, response) => {
     try {
       await handleChat(request, response);
     } catch (error) {
+      console.error('Chat handler error:', formatAiError(error));
       if (!response.headersSent) {
         sendJson(response, 500, { error: error.message || 'Chat failed' });
       } else {
@@ -522,11 +724,24 @@ const server = http.createServer(async (request, response) => {
   serveStatic(url, response);
 });
 
+server.on('error', (error) => {
+  console.error('Server error:', error.message);
+});
+
+process.on('uncaughtException', (error) => {
+  console.error('Uncaught exception:', error);
+});
+
+process.on('unhandledRejection', (error) => {
+  console.error('Unhandled rejection:', error);
+});
+
 server.listen(port, '127.0.0.1', () => {
+  const ai = getAiConfig();
   console.log(`Crew Swap server ready on http://127.0.0.1:${port}`);
   console.log(
-    openaiKey
-      ? `Mission assistant: live chat (${openaiModel})`
-      : 'Mission assistant: local conversational chat (set OPENAI_API_KEY or .env for Live AI)'
+    ai.key
+      ? `Mission assistant: Live AI · ${ai.provider} (${ai.model})`
+      : 'Mission assistant: waiting for GEMINI_API_KEY in .env (see .env.example)'
   );
 });

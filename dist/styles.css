@@ -532,9 +532,10 @@ dialog::backdrop { background: #02060ccc; }
 .assistant-mode[data-mode="live"] {
   color: var(--ok); border-color: var(--ok-line); background: var(--ok-bg);
 }
-.assistant-mode[data-mode="fallback"] {
-  color: color-mix(in oklab, var(--action) 75%, var(--muted));
-  border-color: color-mix(in oklab, var(--action) 30%, var(--line));
+.assistant-mode[data-mode="setup"] {
+  color: var(--amber);
+  border-color: var(--amber-line);
+  background: var(--amber-bg);
 }
 .assistant-close,
 .assistant-icon-btn {
